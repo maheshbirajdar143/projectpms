@@ -1,0 +1,83 @@
+ 
+
+        table.redTable {
+        border: 1px solid #8508a4;
+        background-color: #EEE7DB;
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
+        }
+
+        table.redTable td, table.redTable th {
+        border: 1px solid #AAAAAA;
+        padding: 1px 1px;
+        }
+
+        table.redTable tbody td {
+        font-size: 13px;
+        }
+
+        /* table.redTable tr:nth-child(even) {
+        background: #F5C8BF;
+        } */
+
+        table.redTable thead {
+        background: #504a4a;
+        }
+
+        table.redTable thead th {
+        font-size: 15px;
+        font-weight: bold;
+        color: #FFFFFF;
+        text-align: center;
+        border-left: 1px solid #b8b0b0;
+        }
+        
+        table.redTable thead th:first-child {
+        border-left: none;
+        }
+
+        .search-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        }
+
+        .search-container form {
+        display: flex;
+        align-items: center;
+        }
+
+        .search-container input,
+        .search-container button {
+        margin-left: 10px;
+        }
+
+        .red-bg {
+            background-color: red;
+        }
+
+        .green-bg {
+            background-color: green;
+        }
+
+        .orange-bg {
+            background-color: orange;
+        }
+
+        .form-control::placeholder {
+        font-size: 14px; 
+        }
+
+        .import-data {
+        margin-right: auto;
+        }
+
+        .form-control-sm {
+        font-size: 12px;
+        }
+
+        .active-column {
+        background-color: green;
+        }
+        

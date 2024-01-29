@@ -1,0 +1,41 @@
+
+
+.redTable {
+    margin: 0 auto; /* Align the table in the center */
+    width: 20%; /* Adjust the width as needed */
+    border-collapse: collapse;
+}
+
+.redTable th, .redTable td {
+    border: 1px solid black;
+    padding: 6px;
+    text-align: center;
+}
+
+.fixed-width-btn {
+width: 110px;
+}
+
+
+.centered-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  h6 {
+    animation: textGrow 6s infinite;
+  }
+  
+  @keyframes textGrow {
+    0% {
+      font-size: 16px;
+    }
+    50% {
+      font-size: 24px;
+    }
+    100% {
+      font-size: 16px;
+    }
+  }

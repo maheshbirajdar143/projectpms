@@ -1,0 +1,97 @@
+
+table.redTable {
+border: 1px solid #8508a4;
+background-color: #EEE7DB;
+width: 100%;
+text-align: center;
+border-collapse: collapse;
+}
+
+table.redTable td, table.redTable th {
+border: 1px solid #AAAAAA;
+padding: 0px 0px;
+}
+
+table.redTable tbody td {
+font-size: 13px;
+}
+
+/* table.redTable tr:nth-child(even) {
+background: #F5C8BF;
+} */
+
+table.redTable thead {
+background: #504a4a;
+}
+
+table.redTable thead th {
+font-size: 15px;
+font-weight: bold;
+color: #FFFFFF;
+text-align: center;
+border-left: 1px solid #b8b0b0;
+}
+
+table.redTable thead th:first-child {
+border-left: none;
+}
+
+.search-container {
+display: flex;
+justify-content: flex-end;
+align-items: center;
+}   
+
+.search-container form {
+display: flex;
+align-items: center;
+}
+
+.search-container input,
+.search-container button {
+margin-left: 10px;
+}
+
+.description-cell {
+max-width: 100px; 
+word-wrap: break-word;
+}
+
+.import-data {
+margin-right: auto;
+}
+
+.form-control::placeholder {
+font-size: 15px; 
+}
+
+.form-control-sm {
+    font-size: 12px;
+}
+
+.highlight {
+background-color: orange;
+}
+
+.highlight1 {
+background-color: green;
+}
+
+
+.active-column {
+background-color: green;
+}
+
+.highlighted {
+background-color: yellow; 
+}
+
+.filter-input {
+max-width: 80px;
+padding: 0px; 
+}
+
+.fixed-width-btn {
+width: 80px;
+}
+

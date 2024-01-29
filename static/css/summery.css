@@ -1,0 +1,46 @@
+       
+
+        .redTable {
+        border-collapse: collapse;
+        width: 30%;
+        margin: 10px;
+        }
+
+        .redTable th, .redTable td {
+        border: 1px solid black;
+        padding: 6px;
+        text-align: center;
+        background-color: skyblue;
+        }
+
+        h5 {
+        margin: 125px;
+        }
+
+        .chart-container1 {
+        position: absolute;
+        top: 130px;
+        left: 700px;
+        z-index: 1; 
+        }
+
+        .chart-container2 {
+        position: absolute;
+        top: 130px;
+        left: 1200px;
+        z-index: 1;
+        }
+
+        .chart-container3 {
+        position: absolute;
+        top: 470px;
+        left: 700px;
+        z-index: 1;
+        }
+        
+
+
+        .fixed-width-btn {
+                width: 90px;
+                }
+                
