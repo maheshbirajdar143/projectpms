@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <title>PMS: Production {{ project_name }}</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/pshots.css' %}">
+        <script src="{% static 'js/store2.min.js' %}"></script>
+    </head>
+
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %}
+    <br>
+    <br>
+    <div class="p-3 mb-2 text-black" style='font-size: 18px; text-align: center; position: relative;'>
+        <div style = 'display: inline-block; font-size: 18px;  color:white'>
+            <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 300px; height:25px; ">Project: {{ project_name | upper }}</h5>
+        </div>
+        
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 10px; right: 0;">Added Date: {{ project_added_date | date:"d/m/Y" }}</span></small>
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 30px; right: 0;">TGT Date: {{ project_TGT_Date | date:"d/m/Y"}}</span></small>
+    </div>
+    
+
+
+        {% if shots %}
+                
+                <div class="search-container">
+
+                    <div style = 'display: inline-block;'>
+                        <a href="{% url 'allproject' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-primary btn-sm mx-1">All Project </a>
+                    </div>
+
+                    <div>
+                        <form method="post" action="{% url 'addshot_project' project_name=project_name %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="project_name" value="{{ project_name }}">
+                            <button type="submit" style='border-radius: 15px; text-align: center;' class="btn btn-outline-primary btn-sm">Add Shot</button>
+                        </form>
+                    </div>
+
+                    <div class ='import-data'> 
+                        <button id="edit-multiple-btn" style='border-radius: 15px; text-align: center;' class="btn btn-outline-primary btn-sm">Edit Int.Status</button>
+                        <div id="popup-container" class="popup-container">
+                            <div id="edit-multiple-popup" class="popup2">
+                                <form id="edit-multiple-form" method="post" action="{% url 'update_work_status1' project_name=project_name%}">
+                                    {% csrf_token %}
+                                    <textarea name="shot_names" placeholder="Enter Shots" required></textarea>
+                                    <select name="internal_status" class="btn btn-outline-info btn-sm" required>
+                                        <option value="HOLD" style="font-size: small;">HOLD</option>
+                                        <option value="OMMIT" style="font-size: small;">OMIT</option>
+                                        <option value="WIP" style="font-size: small;">WIP</option>
+                                        <option value="CANCEL" style="font-size: small;">CANCEL</option>
+                                        <option value="YTS" style="font-size: small;">YTS</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-outline-info btn-sm">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>    
+                    
+                    <div class="import-data">
+                        <form method="post" style="display: flex; flex-direction: column; margin-left: 230px;">
+                            {% csrf_token %}
+                    
+                            <div>
+                                <div>
+                                    <input style="width: 130px; height: 30px; border-radius: 15px; text-align: center;" type="text" id="new_column_name" name="new_column_name" placeholder="Add Col">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm" style="width: 30px; height: 30px; border-radius: 15px;" title="Add Column">+</button>
+                                </div>
+                            </div>
+                    
+                            <div>
+                                <div>
+                                    <input style="width: 130px; height: 30px; border-radius: 15px; text-align: center;" type="text" id="remove_column" name="remove_column" placeholder="Remove Col">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" style="width: 30px; height: 30px;  border-radius: 15px;"
+                                        onclick="return confirm('Are you sure, you want to remove this column?');" title="Remove Column">x</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>             
+
+                    <small> 
+                        <!-- &bull; Not Editable to double click <b>(Shot Name / Shot Version)</b><br> -->
+                        &bull; After Shot Assigned, should not be change <b>(Assignment/Internal Status)</b> 
+                    </small> 
+                </div>
+
+                <table class="redTable" id="table">
+                    <thead>
+                        <tr>
+                            <th>Sr.No</th>
+                            <th>                 <span>Shot Name       </span> </th>
+                            <th>                 <span>Shot Version    </span> </th>
+                            <th title="Editable"><span>Dependency      </span> </th>
+                            <th title="Editable"><span>Scope of Work   </span> </th>
+                            <th>                 <span>Assignment      </span> </th>
+                            <th>                 <span>Internal Status </span>   </th>
+                            <th title="Editable"><span>Comp Status     </span>   </th>
+                            <th title="Editable"><span>Remark          </span>   </th>
+                            <th title="Editable"><span>Client Status   </span>   </th>
+
+                            {% if shots %}
+                                {% for column_name in shots.0.added_column %}
+                                    <th><span>{{ column_name }}</span> </th>
+                                {% endfor %}
+                            {% endif %}
+
+                            <th>Take Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shot in shots %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <a href="javascript:void(0);" onclick="openPopupz(`{% url 'get_review_approval_info' shot.id %}`)"
+                                    title="Click here to view shot info">{{ shot.shot_name }}
+                                </a>
+                            </td>
+
+                                <div id="popup-container1" class="popup-container1"  onclick="closePopupz(event)">
+                                    <div class="popup-content1" onclick="event.stopPropagation();">
+                                        <span class="close-button1" onclick="closePopupz()" title="Close">&times;</span>
+                                        <iframe id="popup-iframe" src="" frameborder="0"></iframe>
+                                    </div>
+                                </div>
+
+                            <!-- <td ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="shot_name">
+                                    <input type="text" name="column_value_{{ shot.id }}_shot_name" value="{{ shot.shot_name }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.shot_name }} </span>
+                            </td> -->
+
+                            <!-- <td ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="shot_version">
+                                    <input type="text" name="column_value_{{ shot.id }}_shot_version" value="{{ shot.shot_version }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.shot_version }} </span>
+                            </td>  -->
+
+                            <td>{{ shot.shot_version }}</td>
+                            <!-- <td class="description-cell">{{ shot.dependency|safe }}</td> -->
+
+                            <td ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="dependency">
+                                    <input type="text" name="column_value_{{ shot.id }}_dependency" value="{{ shot.dependency }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.dependency|safe }} </span>
+                            </td>
+
+                            <td class="description-cell" ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="work_description">
+                                    <input type="text" name="column_value_{{ shot.id }}_work_description" value="{{ shot.work_description }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.work_description }} </span>
+                            </td> 
+
+                            <td style="position: relative;">
+                                {% if shot.work_status == 'Assigned' %}
+                                    <span style="color: orange;">{{ shot.work_status }}</span>
+
+                                    <a href="javascript:void(0);" onclick="openPopupz(`{% url 'shotdep' shot.id %}`)" title="Shot assigned & status info" style="position: absolute; right: 0;"
+                                        onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">&#x1F4DD;
+                                    </a>
+                                {% else %}
+                                    <span style="color: red;">{{ shot.work_status }}</span>
+                                {% endif %}
+                            </td>
+                              
+                                    <div id="popup-container1" class="popup-container1"  onclick="closePopupz(event)">
+                                        <div class="popup-content1" onclick="event.stopPropagation();">
+                                            <span class="close-button1" onclick="closePopupz()" title="Close">&times;</span>
+                                            <iframe id="popup-iframe" src="" frameborder="0"></iframe>
+                                        </div>
+                                    </div>
+
+                            <td>
+                                {% if shot.internal_status == 'READY FOR REVIEW' %}
+                                    <span style="color: green;"> {{shot.internal_status}}</span>
+                                {% elif 'REVIEWED' in shot.internal_status %}
+                                    <span style="color: #4dc3ff;;">{{shot.internal_status}}</span> 
+                                {% elif shot.internal_status == 'WIP' %}
+                                    <span style="color: orange;">{{shot.internal_status}} </span> 
+                                {% elif shot.internal_status == 'HOLD' or shot.internal_status == 'OMMIT' %}
+                                    <span style="color: #ff4de1;">{{ shot.internal_status }}</span>
+                                {% elif shot.internal_status == 'YTS' %}
+                                    <span style="color: red;">{{shot.internal_status}} </span>   
+                                {% else %}    
+                                    <span>{{shot.internal_status}} </span>                                                         
+                                {% endif %}
+                            </td>
+
+                            <td ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="comp_status">
+                                    <input type="text" name="column_value_{{ shot.id }}_comp_status" value="{{ shot.comp_status }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.comp_status }} </span>
+                            </td> 
+
+                            <td class="description-cell1" ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="remark">
+                                    <input type="text" name="column_value_{{ shot.id }}_remark" value="{{ shot.remark }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.remark }} </span>
+                            </td> 
+
+                            <td class="description-cell1" ondblclick="makeEditable(this)">
+                                <form method="post" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="client_status">
+                                    <input type="text" name="column_value_{{ shot.id }}_client_status" value="{{ shot.client_status }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                                <span onclick="editValue(this)"> {{ shot.client_status }} </span>
+                            </td>
+
+                            {% if shots %}
+                                {% for column_name, column_value in shot.added_column.items %}
+                                    <td class="description2-cell" ondblclick="makeEditable(this)">
+                                        <form method="post" style="display:none;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                            <input type="hidden" name="column_name" value="{{ column_name }}">
+                                            <input type="text" name="column_value_{{ shot.id }}_{{ column_name }}" value="{{ column_value|default:'' }}">
+                                            <input type="submit" value="Save">
+                                        </form>
+                                        <span onclick="editValue(this)"> {{ column_value|default:'' }} </span>
+                                    </td>
+                                {% endfor %}
+                            {% endif %}
+
+                            
+                            <td>
+                                <a href="{% url 'editshot' shot.id %}" class="text-success"
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)" title="Edit shot deatils">&#9998;
+                                </a>&nbsp;
+                            
+                                {% if user.is_authenticated and user.username == "maheshb" %}
+                                    <a href="{% url 'deleteshot' shot.id %}" class="text-danger"
+                                        onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)"
+                                        onclick="return confirm('Are you sure, you want to delete this shot?')" title="Delete Shot">x
+                                    </a>&nbsp;
+                                {% else %}
+                                    <a href="#" 
+                                        onclick="return confirm('You do not have access to delete this shot !')"
+                                        class="text-danger" title="Delete Shot">x
+                                    </a>
+                                {% endif %}
+
+                                <a href="{% url 'shot_history' shot.id %}" class="info-icon" title="View Updated Changes" 
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">&#9432;
+                                </a>&nbsp;
+
+                                <a href="{% url 'issueshot' %}?shot_name={{ shot.shot_name }}&project_name={{ shot.project_name }}&work_description={{ shot.work_description }}&shot_version={{ shot.shot_version }}"
+                                    onclick="checkDependency('{{ shot.dependency }}');" class="text-success"
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">Assign
+                                </a>
+
+                                <!-- <a href="{% url 'internal' shot.id %}" class="info-icon1" title="View Internal Status Changes" 
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">&#9432;
+                                </a> -->
+                            </td>
+                             
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        {% else %}
+            <h6> Shots Not Available </h6>
+        {%endif%}   
+  </body>
+</html>
+
+<div class="pagination" style="float: right;">
+    <span class="step-links">
+        {% if shots.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <!-- <a href="?page={{ shots.previous_page_number }}">previous</a> -->
+        {% endif %}
+
+        {% for i in shots.paginator.page_range %}
+            <span class="{% if i == shots.number %}current{% endif %}">
+                <a href="?page={{ i }}">{{ i }}</a>
+            </span>
+        {% endfor %}
+
+        {% if shots.has_next %}
+            <!-- <a href="?page={{ shots.next_page_number }}">next</a> -->
+            <a href="?page={{ shots.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div> <br>
+<!-- ------------------------------------------------------------------------------------------------------------------------ -->
+<!-- popup for shot info  outside click close -->
+
+<script>
+    function openPopupz(url) {
+    var popupContainer = document.getElementById('popup-container1');
+    var popupIframe = document.getElementById('popup-iframe');
+
+    popupIframe.src = url;
+    popupContainer.style.display = 'block';
+
+    document.body.addEventListener('click', closePopupzOutside);
+    }
+
+    function closePopupz() {
+        var popupContainer = document.getElementById('popup-container1');
+        popupContainer.style.display = 'none';
+    }
+</script>
+
+<!-------------------------------------------------- -------------------------------------------------------------------- -->
+                                    <!-- popup -->
+    <script>
+        function openPopup(message) {
+        var modal = document.createElement('div');
+        modal.className = 'popup';
+        
+        var modalContent = document.createElement('div');
+        modalContent.className = 'popup-content';
+        modalContent.textContent = message;
+
+        var closeButton = document.createElement('span');
+        closeButton.className = 'popup-close';
+        closeButton.textContent = 'X';
+        
+        modal.appendChild(modalContent);
+        modal.appendChild(closeButton);
+        
+        var currentTd = event.target.closest('td');
+        currentTd.appendChild(modal);
+        
+        closeButton.addEventListener('click', function() {
+            currentTd.removeChild(modal);
+        });
+        }
+
+        function highlightShot(element) {
+        element.style.backgroundColor = 'yellow';
+        }
+
+        function removeHighlight(element) {
+        element.style.backgroundColor = '';
+        }
+    </script>
+
+<!-------------------------------------------------- -------------------------------------------------------------------- -->
+                                    <!-- After new column added & value save when double click -->
+<script>
+    function makeEditable(td) {
+        var span = td.querySelector('span');
+        var form = td.querySelector('form');
+        span.style.display = 'none';
+        form.style.display = 'block';
+    }
+    
+    function editValue(span) {
+        var td = span.parentNode;
+        var form = td.querySelector('form');
+        var input = form.querySelector('input[type="text"]');
+        var saveButton = form.querySelector('input[type="submit"]');
+        
+        span.textContent = input.value;
+        
+        form.style.display = 'none';
+        span.style.display = 'inline';
+    }
+</script>
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------- -->
+                            <!-- highlighted shot name  -->
+
+<script>
+    function highlightShot(button) {
+    var row = $(button).closest('tr');
+    $(row).find('td:eq(1)').addClass('highlight');
+    }
+
+    function removeHighlight(button) {
+    var row = $(button).closest('tr');
+    $(row).find('td:eq(1)').removeClass('highlight');
+    }
+</script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                                <!-- Edit multiple shot status  -->
+
+    <script>
+
+        const editMultipleBtn = document.getElementById('edit-multiple-btn');                                
+        const editMultiplePopup = document.getElementById('edit-multiple-popup');
+        const popupContainer = document.getElementById('popup-container');
+
+        editMultipleBtn.addEventListener('click', function() {
+            popupContainer.style.display = 'flex'; 
+        });
+
+        popupContainer.addEventListener('click', function(event) {
+            if (event.target === popupContainer) {
+                popupContainer.style.display = 'none';
+            }
+        });
+    </script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------ -->
+                     <!-- column move and saved to new position permanently  -->
+
+                <script>
+                    $(document).ready(function() {
+                        let isMouseDown = false;
+                        let currentColumn;
+                        let originalColumnIndex;
+                    
+                        // const savedColumnOrder = store.get('columnOrder') || [];
+                        const savedColumnOrder = store.get('columnOrder_' + '{{ project_name }}') || [];                        
+                    
+                        if (savedColumnOrder.length > 0) {
+                        // Rearrange the columns based on the saved order
+                        const table = $('#table');
+                        const headerRow = table.find('thead tr');
+                        const dataRows = table.find('tbody tr');
+                    
+                        for (const columnName of savedColumnOrder) {
+                            const thToMove = headerRow.find(`th:contains('${columnName}')`);
+                            const columnIndex = headerRow.find('th').index(thToMove);
+                            
+                            if (columnIndex !== -1) {
+                            headerRow.append(thToMove);
+                            dataRows.each(function() {
+                                const tdToMove = $(this).find('td').eq(columnIndex);
+                                $(this).append(tdToMove);
+                            });
+                            }
+                        }
+                        }
+                    
+                        $('th').on('mousedown', function() {
+                        isMouseDown = true;
+                        currentColumn = $(this).index();
+                        originalColumnIndex = currentColumn;
+                        $(this).addClass('active-column');
+                        });
+                    
+                        $('th').on('mousemove', function() {
+                        if (isMouseDown && currentColumn !== $(this).index()) {
+                            let targetColumn = $(this).index();
+                            $('tr').each(function() {
+                            let cells = $(this).children();
+                            if (targetColumn > currentColumn) {
+                                for (let i = currentColumn; i < targetColumn; i++) {
+                                let cellToMove = cells.eq(i);
+                                let nextCell = cells.eq(i + 1);
+                                cellToMove.insertAfter(nextCell);
+                                }
+                            } else {
+                                for (let i = currentColumn; i > targetColumn; i--) {
+                                let cellToMove = cells.eq(i);
+                                let prevCell = cells.eq(i - 1);
+                                cellToMove.insertBefore(prevCell);
+                                }
+                            }
+                            });
+                            currentColumn = targetColumn;
+                        }
+                        });
+                    
+                        $(document).on('mouseup', function() {
+                        if (isMouseDown) {
+                            isMouseDown = false;
+                            $('th').removeClass('active-column');
+                    
+                            // Store the column order in localStorage
+                            const columnOrder = [];
+                            $('th').each(function() {
+                            columnOrder.push($(this).text());
+                            });
+                            // store.set('columnOrder', columnOrder);
+                            store.set('columnOrder_' + '{{ project_name }}', columnOrder);
+                    
+                            // Ensure columns are rearranged smoothly by resetting the table layout
+                            setTimeout(function() {
+                            $('#table').css('table-layout', 'auto');
+                            }, 0);
+                        }
+                        });
+                    });
+                    </script>
+                    
+<!-- ------------------------------------------------------------------------------------------------------------------------------- -->
+                <!-- column search box -->
+
+                <!-- <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const table = document.getElementById('table');
+                        const headers = table.getElementsByTagName('th');
+                        const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+                
+                        // Update filter symbols and apply stored filters
+                        for (let i = 1; i < headers.length - 1; i++) {
+                            const filterSymbol = document.createElement('span');
+                            filterSymbol.innerHTML = ' &#9660;';
+                            filterSymbol.style.cursor = 'pointer';
+                            filterSymbol.onclick = function () {
+                                showFilterDropdown(i);
+                            };
+                            headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+                            headers[i].appendChild(filterSymbol);
+                
+                            if (storedFilters[i] && storedFilters[i] !== 'all') {
+                                applyFilter(i, storedFilters[i]);
+                            }
+                        }
+                
+                        function showFilterDropdown(columnIndex) {
+                            const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+                            const dropdown = document.createElement('div');
+                            dropdown.className = 'filter-dropdown';
+                
+                            values.forEach(value => {
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.value = value;
+                                checkbox.checked = storedFilters[columnIndex] && storedFilters[columnIndex].includes(value);
+                                checkbox.addEventListener('change', function () {
+                                    updateCheckboxFilters(columnIndex);
+                                });
+                
+                                const label = document.createElement('label');
+                                label.appendChild(checkbox);
+                                label.appendChild(document.createTextNode(value));
+                
+                                dropdown.appendChild(label);
+                            });
+                
+                            const applyButton = document.createElement('button');
+                            applyButton.innerText = 'Apply';
+                            applyButton.addEventListener('click', function () {
+                                applyFilter(columnIndex, getSelectedCheckboxValues(columnIndex));
+                                document.body.removeChild(dropdown);
+                            });
+                            applyButton.className = 'filter-apply-button';
+                            dropdown.appendChild(applyButton);
+                
+                            const filterSymbol = headers[columnIndex].lastChild;
+                            const rect = headers[columnIndex].getBoundingClientRect();
+                            dropdown.style.position = 'absolute';
+                            dropdown.style.top = rect.bottom + 'px';
+                            dropdown.style.left = rect.left + 'px';
+                            document.body.appendChild(dropdown);
+                        }
+                
+                        function updateCheckboxFilters(columnIndex) {
+                            const checkboxes = document.querySelectorAll('.filter-dropdown input[type="checkbox"]');
+                            const selectedValues = Array.from(checkboxes)
+                                .filter(checkbox => checkbox.checked)
+                                .map(checkbox => checkbox.value);
+                
+                            storedFilters[columnIndex] = selectedValues.length > 0 ? selectedValues : 'all';
+                        }
+                
+                        function getSelectedCheckboxValues(columnIndex) {
+                            const checkboxes = document.querySelectorAll('.filter-dropdown input[type="checkbox"]');
+                            return Array.from(checkboxes)
+                                .filter(checkbox => checkbox.checked)
+                                .map(checkbox => checkbox.value);
+                        }
+                
+                        function applyFilter(columnIndex, filterValues) {
+                            for (let i = 1; i < table.rows.length; i++) {
+                                let rowMatchesFilters = true;
+                                for (const index in storedFilters) {
+                                    const cellValue = table.rows[i].cells[index].textContent;
+                                    if (Array.isArray(storedFilters[index]) && storedFilters[index].length > 0) {
+                                        if (!storedFilters[index].includes(cellValue)) {
+                                            rowMatchesFilters = false;
+                                            break;
+                                        }
+                                    } else if (storedFilters[index] !== 'all' && cellValue !== storedFilters[index]) {
+                                        rowMatchesFilters = false;
+                                        break;
+                                    }
+                                }
+                                table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+                            }
+                
+                            storedFilters[columnIndex] = filterValues;
+                            sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+                        }
+                    });
+                </script> -->
+
+
+                    <!-- <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const table = document.getElementById('table');
+                            const headers = table.getElementsByTagName('th');
+                            const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+                    
+                            // Update filter symbols and apply stored filters
+                            for (let i = 1; i < headers.length - 1; i++) {
+                                const filterSymbol = document.createElement('span');
+                                filterSymbol.innerHTML = ' &#9660;';
+                                filterSymbol.style.cursor = 'pointer';
+                                filterSymbol.onclick = function () {
+                                    showFilterDropdown(i);
+                                };
+                                headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+                                headers[i].appendChild(filterSymbol);
+                    
+                                if (storedFilters[i] && storedFilters[i] !== 'all') {
+                                    applyFilter(i, storedFilters[i]);
+                                }
+                            }
+                    
+                            function showFilterDropdown(columnIndex) {
+                                const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+                                const dropdown = document.createElement('select');
+                                dropdown.innerHTML = '<option value="all">All</option>';
+                    
+                                values.forEach(value => {
+                                    const option = document.createElement('option');
+                                    option.value = value;
+                                    option.text = value;
+                                    dropdown.add(option);
+                                });
+                    
+                                dropdown.value = storedFilters[columnIndex] || 'all';
+                    
+                                dropdown.onchange = function () {
+                                    applyFilter(columnIndex, this.value);
+                                    document.body.removeChild(dropdown);             // dropdown auto remove after filter applied
+                                };
+                    
+                                const filterSymbol = headers[columnIndex].lastChild;
+                                const rect = filterSymbol.getBoundingClientRect();
+                                dropdown.style.position = 'absolute';
+                                dropdown.style.top = rect.bottom + 'px';
+                                dropdown.style.left = rect.left + 'px';
+                                document.body.appendChild(dropdown);
+                            }
+                    
+                            function applyFilter(columnIndex, filterValue) {
+                                storedFilters[columnIndex] = filterValue;
+                    
+                                for (let i = 1; i < table.rows.length; i++) {
+                                    let rowMatchesFilters = true;
+                                    for (const index in storedFilters) {
+                                        const cellValue = table.rows[i].cells[index].textContent;
+                                        if (storedFilters[index] !== 'all' && cellValue !== storedFilters[index]) {
+                                            rowMatchesFilters = false;
+                                            break;
+                                        }
+                                    }
+                                    table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+                                }
+                    
+                                sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+                            }
+                        });
+                    </script> -->
+
+<!-- ------------------------------------------------------------------------------------------------------------------------------- -->
+                     <!-- Auto refresh after 300 sec -->
+
+<script>
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------ -->
+
+
+<!-- <td ondblclick="makeEditable(this)">
+    <form method="post" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="shot_id" value="{{ shot.id }}">
+        <input type="hidden" name="column_name" value="dependency">
+        <input type="text" name="column_value_{{ shot.id }}_dependency" value="{{ shot.dependency }}">
+        <input type="submit" value="Save">
+    </form>
+    <span onclick="editValue(this)"> {{ shot.dependency|safe }} </span>
+</td>  -->

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/search2.css' %}">
+    </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbaradmin.html" %}
+        <br>
+        <br>
+        <h3 class="p-3 mb-2 bg-primary text-white" style = 'font-size: 15px;text-align:center;margin-bottom:0px;'>Shot assigned to Artist !</h3>
+
+            {% if li %}
+                
+                <table class="redTable">
+                    <thead>
+                        <tr>
+                            <th>Sr. No.           </th>
+                            <th>Artist Name       </th>
+                            <th>Project Name      </th>
+                            <th>Shot Name         </th>
+                            <th>Department        </th>
+                            <th>Issued Date       </th>
+                            <th>TGT Date          </th>
+                            <th>Shot Status       </th>
+                            <th>Note              </th>
+                            <th>Comment by Artist </th>
+                            <th>Overdue           </th>
+                            <th>Manday           </th>
+                            <!-- <th>Action            </th>
+                            <th>Status Received Date</th> -->
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        {% for each in li %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{each.0}}</td>
+                                <td>{{each.1}}</td>
+                                <td>{{each.2}}</td>
+                                <td>{{each.3}}</td>
+                                <td>{{each.4 | date:"d/m/Y"}}</td>
+                                <td>{{each.5 | date:"d/m/Y"}}</td>
+    
+                                <td>
+                                    {% if each.6  == 'DONE' or each.6  == 'READY FOR REVIEW' %}
+                                        <span style="color: green;">{{ each.6  }} ({{ each.12 | date:"d/m/Y" }})</span>    
+                                    {% elif each.6  == 'Assigned' %}
+                                        <span style="color: orange;">{{ each.6  }}</span>
+                                    {% elif each.6  == 'WIP' %}
+                                        <span style="color: orange;">{{ each.6  }}</span>
+                                    {% elif each.6  == 'HOLD' %}
+                                        <span style="color: orange;">{{ each.6  }} ({{ each.12 | date:"d/m/Y" }})</span>
+                                    {% else %}
+                                        <span style="color: red;">{{ each.6  }}</span>
+                                    {% endif %}
+                                </td>
+    
+                                <td>{{each.7 }}</td>
+                                <td>{{each.8 }}</td>
+    
+                                {% if each.9 == 0 %}
+                                    <td> {{each.9}} </td>
+                                {% else %}
+                                    <td style="color:red"> {{each.9}} </td>
+                                {% endif %}
+    
+                                <td>{{each.10}}</td>
+    
+                                <!-- <td>
+                                    <a href="{% url 'deleteissuedshot' each.11 %}" class="text-danger"
+                                        onclick="return confirm('Are you sure, you want to delete this?');">Delete
+                                    </a> 
+                                </td> -->
+                                
+                                <!-- <td>{{ each.12 | date:"d/m/Y" }}</td> -->
+                            </tr>
+                        {%endfor%}
+                    </tbody>
+                </table>
+            {% else %}
+                <h4>Yet, No Shot Assigned</h4>
+            {% endif %}
+            
+  </body>
+</html>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+
+            <script>
+                function changeColor()
+                {
+                    var table = document.getElementById("table"); 
+                    var cells = table.getElementsByTagName("td"); 
+                    
+                    for (var i = 0; i < cells.length; i++) { 
+                    var cell = cells[i];
+                    var text = cell.innerText.toLowerCase(); 
+                    
+                    if (text.includes("yts")) { 
+                        cell.style.backgroundColor = "red"; 
+                    } else if (text.includes("wip")) { 
+                        cell.style.backgroundColor = "orange"; 
+                    } else if (text.includes("done")) { 
+                        cell.style.backgroundColor = "green"; 
+                    }
+                    }
+                }
+                changeColor();
+            </script>
+                                        
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                                                    <!-- new column movement -->
+
+                    <script>
+                        $(document).ready(function() {
+                            let isMouseDown = false;
+                            let currentColumn;
+                            let originalColumnIndex;
+                    
+                            $('th').on('mousedown', function() {
+                                isMouseDown = true;
+                                currentColumn = $(this).index();
+                                originalColumnIndex = currentColumn;
+                                $(this).addClass('active-column');
+                            });
+                    
+                            $('th').on('mousemove', function() {
+                                if (isMouseDown && currentColumn !== $(this).index()) {
+                                    let targetColumn = $(this).index();
+                                    $('tr').each(function() {
+                                        let cells = $(this).children();
+                                        if (targetColumn > currentColumn) {
+                                            for (let i = currentColumn; i < targetColumn; i++) {
+                                                let cellToMove = cells.eq(i);
+                                                let nextCell = cells.eq(i + 1);
+                                                cellToMove.insertAfter(nextCell);
+                                            }
+                                        } else {
+                                            for (let i = currentColumn; i > targetColumn; i--) {
+                                                let cellToMove = cells.eq(i);
+                                                let prevCell = cells.eq(i - 1);
+                                                cellToMove.insertBefore(prevCell);
+                                            }
+                                        }
+                                    });
+                                    currentColumn = targetColumn;
+                                }
+                            });
+                    
+                            $(document).on('mouseup', function() {
+                                if (isMouseDown) {
+                                    isMouseDown = false;
+                                    $('th').removeClass('active-column');
+                                    // Ensure columns are rearranged smoothly by resetting the table layout
+                                    $('#table').css('table-layout', 'fixed');
+                                    setTimeout(function() {
+                                        $('#table').css('table-layout', 'auto');
+                                    }, 0);
+                                }
+                            });
+                        });
+                    </script>
+
+<!-- --------------------------------------------------------------------------------------------------------------------- -->

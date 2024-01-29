@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>PMS: Messages </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/message.css' %}">
+</head>
+<body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbarstudent.html" %} <br><br>
+
+        {% if projects %}
+        {% for project_name, project_data in projects.items %}
+            <h3 class="p-3 mb-2 bg-info text-black" style="font-size: 20px; text-align: center;">
+                Project <ins>{{ project_name }}</ins> with <ins>{{ project_data.count }} shots</ins> added
+                <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#{{ project_name }}Shots">
+                    Show Shots
+                </button>
+            </h3>
+        {% endfor %}
+    {% else %}
+        <div class="centered-text">
+            <h5>No messages !</h5>
+        </div>
+    {% endif %}
+</body>
+</html>
+
+<!-- ---- ------------------------------------------------------------------------------- -->
+
+<!-- <script>
+    // After 2 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 5000);
+</script> -->
+

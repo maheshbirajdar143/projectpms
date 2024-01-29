@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+{% load static %}
+<!-- ⌛️ -->
+<html lang="en" dir="ltr">
+    <head> 
+        <title>PMS: Search All </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/search_all_artist.css' %}">
+    </head>
+
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbarstudent.html" %}
+    <br>
+    <br>
+    <br>
+
+        {% if results %}
+                
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr.No </th>
+                        <th>Project Name  </th>
+                        <th>Shot Name     </th>
+                        <th>Shot Version  </th>
+                        <th>Dependency    </th>
+                        <th>Scope of Work </th>
+                        <th>Created Date  </th>
+                        <th>TGT Date      </th>
+                        <th>Int. Status   </th>
+                        <th>Assignment    </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                       
+                    {% for shot in results %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ shot.project_name }}</td>
+                            <!-- <td>{{ shot.shot_name }}</td> -->
+
+                            <td>
+                                <a href="javascript:void(0);" onclick="openPopupz(`{% url 'get_review_approval_info' shot.id %}`)"
+                                    title="Click here to view shot info">{{ shot.shot_name }}
+                                </a>
+                            </td>
+
+                                <div id="popup-container1" class="popup-container1">
+                                    <div class="popup-content1">
+                                        <span class="close-button1" onclick="closePopupz()" title="Close">&times;</span>
+                                        <iframe id="popup-iframe" src="" frameborder="0"></iframe>
+                                    </div>
+                                </div>
+
+                            <td>{{ shot.shot_version }}</td>
+                            <td class="description-cell">{{ shot.dependency|safe }}</td>
+                            <td class="description-cell">{{ shot.work_description }}</td>
+                            <td>{{ shot.date_started | date:"d/m/Y"  }}</td>
+                            <td>{{ shot.eta | date:"d/m/Y"  }}</td> 
+                            <td>{{shot.internal_status}}</td>
+                         
+                            <td>
+                                {% if shot.work_status == 'Assigned' %}
+                                    <span style="color: orange;">{{ shot.work_status }}</span>
+                                {% else %}
+                                    <span style="color: red;">{{ shot.work_status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="centered-text">
+                <h5>Shot Not Available !</h5>
+            </div>
+        {%endif%}   
+      
+  </body>
+</html><br>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                            <!-- highlighted shot name  -->
+
+<script>
+    function highlightShot(button) 
+        {
+        var row = $(button).closest('tr');
+        $(row).find('td:eq(2)').addClass('highlight');
+        }
+
+    function removeHighlight(button) 
+        {
+        var row = $(button).closest('tr');
+        $(row).find('td:eq(2)').removeClass('highlight');
+        }
+</script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------ -->
+                                 <!-- popup for shot info -->
+
+        <script>
+            function openPopupz(url) {
+            var popupContainer = document.getElementById('popup-container1');
+            var popupIframe = document.getElementById('popup-iframe');
+        
+            popupIframe.src = url;
+            popupContainer.style.display = 'block';
+        }
+        
+        function closePopupz() {
+            var popupContainer = document.getElementById('popup-container1');
+            popupContainer.style.display = 'none';
+        }
+        
+        </script>

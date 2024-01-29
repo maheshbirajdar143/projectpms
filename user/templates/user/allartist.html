@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>PMS: All Artist</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/allartist.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% if is_admin_group %}
+        {% include "user/navbaradmin.html" %}
+    {% else %}
+        {% include "user/navbarstudent.html" %}
+    {% endif %}
+    
+    <br>
+    <br>
+    <h5 class="p-3 mb-2 text-black" style = "font-size: 20px;text-align:center;">All Artist</h5>
+
+        {% if artists %}
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th><span>Emp.ID      </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Name        </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Email       </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Department  </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Designation </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Reporting   </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <!-- <th>Action</th> -->
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for s in artists %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ s.aid }}</td>
+                            <td>{{ s.get_name }}</td>
+                            <td>{{ s.user.email }}</td>
+                            <td>{{ s.department }}</td>
+                            <td>{{ s.designation }}</td>
+                            <td>{{ s.reporting }}</td>
+                            
+                            <!-- {% if is_admin_group %}
+                                <td> <a href="{% url 'editartist' s.id %}" class="text-success"> Edit </a> </td>
+                            {% else %}
+                            <td> <a href="#" class="text-success" title="Button Disabled"> Edit </a> </td>
+                            {% endif %} -->
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="centered-text">
+                <h6 style='color:rgb(244, 42, 237);'>Yet, No Artist Registered !</h6>
+            </div>
+        {% endif %}
+  </body>
+</html>
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->                       
+                                 <!-- column search box -->
+        
+                    <script>
+                        $(document).ready(function () {
+                            $('.filter-input').on('input', function () {
+                                const columnIndex = $(this).closest('th').index(); 
+                                const searchTerm = $(this).val().toLowerCase().trim();
+                                const rows = $('#table tbody tr');
+                    
+                                rows.each(function () {
+                                    const cellValue = $(this).find('td').eq(columnIndex).text().toLowerCase();
+                                    if (cellValue.includes(searchTerm)) {
+                                        $(this).show();
+                                    } else {
+                                        $(this).hide();
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+                             <!-- when cursor move then highlight shot -->
+
+<script>
+    function highlightShot(button) {
+    var row = $(button).closest('tr');
+    $(row).find('td:eq(2)').addClass('highlight');
+    }
+
+    function removeHighlight(button) {
+    var row = $(button).closest('tr');
+    $(row).find('td:eq(2)').removeClass('highlight');
+    }
+</script>

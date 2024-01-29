@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PMS: Change Password </title>
+	<link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/passchange.css' %}">
+
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+	<script src="{% static 'js/jquery.min.js' %}"></script>
+	<script src="{% static 'js/popper.min.js' %}"></script>
+	<script src="{% static 'js/bootstrap.min.js' %}"></script>
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+
+	{% if admin_group %}
+		{% include "user/navbaradmin.html" %}
+	{% else %}
+		{% include "user/navbarstudent.html" %}
+	{% endif %}
+
+	<br><br>
+    <div class="signup-form">
+        <form  method="post" class="form-horizontal" style="color:rgb(241, 235, 227)">
+    		<center><h5 style="color:rgb(241, 235, 227)">Change Password</h5></center>
+            {% csrf_token %}
+            {% for field in form %}
+				<div class="form-group">
+				<label class="control-label col-xs-4">{{ field.label_tag }}</label>
+					<div class="col-xs-8">
+						{{ field }}
+					</div>
+				</div>
+            {% endfor %}
+
+    		<div class="form-group">
+    			<div class="col-xs-8 col-xs-offset-4">
+            		<button type="submit" style='border-radius: 30px; text-align: center; color:black' class="btn btn-outline-secondary">Update</button>
+
+					<a href="{% url 'h' %}">
+						<button type="button" style='border-radius: 30px; text-align: center; color:black' class="btn btn-outline-secondary mx-5">Back</button>
+					</a>
+    			</div>
+    		</div>
+        </form>
+    </div>
+  </body>
+</html>

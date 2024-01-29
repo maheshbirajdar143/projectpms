@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <title>PMS: Online Artist</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    </head>
+    <style>
+        
+    </style>
+    <body style="font-family: 'Roboto', sans-serif;">
+        <center><h2>Online Artist ({{ logged_in_users_count }})</h2></center>
+
+        {% if artist_available %}
+            {% if logged_in_users %}
+                <ul>
+                    {% for user_activity in logged_in_users %}
+                        <li><b> {{ user_activity.user.first_name }} {{ user_activity.user.last_name }} </b><br> 
+                            (<span style="font-size: smaller;">Last Login : {{ user_activity.login_time | date:"d M, H:i"}}</span>)
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <h5>All artists are offline</h5>
+            {% endif %}
+        {% else %}
+            <h5>Not Available</h5>
+        {% endif %}
+    </body>
+</html>
+
+<!-- --------------------------------------------------------------------------------------------------------------- -->
+ 
+<script>
+    // After 5 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 10000);
+</script>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <title>PMS: Home</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/adminafterlogin.css' %}">
+  </head>
+  <body>
+    {% include "user/navbaradmin.html" %}<br><br>
+
+      <!-- <h4 style=" margin-bottom: 0px; text-align:center;" class="p-3 mb-2 bg-info text-black">Welcome To Project Management System</h4> -->
+<h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 450px; height:55px; margin-left: 730px; margin-top: 10px;" class="p-3 mb-2 text-white">Welcome To Project Management System</h5>
+      <div class="jumbotron" id="content" style="margin-bottom: 0px;">
+        <h5 style="text-align:center;">Hello {{user.first_name}}...  <small><i>How are you today ?</small></i>   </h5><br>
+
+        <!-- <hr class="my-6"> -->
+        <div class="options" style="text-align:center">
+          <!-- <p><b>As you are <ins>Admin</ins>, Options Available For You !</b></p> -->
+          <div class="button-container">
+            <a href="{% url 'allproject' %}"     style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Production</a>
+            <a href="{% url 'allshot' %}"        style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Task</a>
+            <a href="{% url 'mandays' %}"        style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Mandays</a><br><br>
+            <a href="{% url 'viewissuedshot' %}" style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Artist</a>
+            <a href="{% url 'mang_message1' %}"  style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Sup&Mang</a>
+            <a href="{% url 'summery' %}"        style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Summary</a>
+          </div>        
+        </div>
+      </div>
+  </body>
+</html>

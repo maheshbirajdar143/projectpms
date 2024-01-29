@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/search4.css' %}">
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbarstudent.html" %}<br><br><br>
+        
+            {% if li1%}
+                <div class="search-container">
+                    <form class="form-inline" method="get" action="#">
+                        <input class="form-control form-control-sm mr-sm-2" type="text" name="q" placeholder="Search" aria-label="Search" value="{{ request.GET.q }}">
+                        <button class="btn btn-outline-success btn-sm" type="submit">&#128269;</button>
+                    </form>
+                </div>
+
+               
+                <table class="redTable">
+                    <thead>
+                        <tr>
+                            <th>Sr.No        </th>
+                            <th>Name         </th>
+                            <th>Project Name </th>
+                            <th>Shot Name    </th>
+                            <th>Issued Date  </th>
+                            <th>TGT Date     </th>
+                            <th>Note         </th>
+                            <th>Shot Status  </th>
+                            <th>Send        </th>
+                        </tr>
+                    </thead>
+                
+                    <tbody>
+                        {% for t in li1 %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{t.0}}</td>
+                                <td>{{t.2}}</td>
+                                <td>{{t.3}}</td>
+                                <td>{{t.4| date:"d/m/Y"}}</td>
+                                <td>{{t.5 | date:"d/m/Y"}}</td>
+                                <td>{{t.6}}</td>
+                                <td>{{t.7}}</td>
+
+                                {% if t.7 == 'DONE' or t.7 == 'READY FOR REVIEW' %} 
+                                    <td style="color: green;">Sent</td>    
+                                {% else %}
+                                    <td>
+                                        <form action="{% url 'sendfeedback' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="artist" value="{{ t.0 }}">
+                                            <input type="hidden" name="project_name" value="{{ t.2 }}">
+                                            <input type="hidden" name="shot_name" value="{{ t.3 }}">
+                                            <input type="hidden" name="department" value="{{ t.1 }}">
+                                            <button type="submit" class="btn btn-outline-info btn-sm" 
+                                                onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">Send</button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+
+                                
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {%else%}
+                <h5> No Shot Assigned to you</h5>
+            {%endif%}
+    </body>
+</html>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                                    <!-- highlighted shot name  -->
+
+                <script>
+                    function highlightShot(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(3)').addClass('highlight');
+                    }
+
+                    function removeHighlight(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(3)').removeClass('highlight');
+                    }
+                </script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                              <!-- new column movement -->
+
+            <script>
+            $(document).ready(function() {
+            let isMouseDown = false;
+            let currentColumn;
+            let originalColumnIndex;
+
+            $('th').on('mousedown', function() {
+                isMouseDown = true;
+                currentColumn = $(this).index();
+                originalColumnIndex = currentColumn;
+                $(this).addClass('active-column');
+            });
+
+            $('th').on('mousemove', function() {
+                if (isMouseDown && currentColumn !== $(this).index()) {
+                    let targetColumn = $(this).index();
+                    $('tr').each(function() {
+                        let cells = $(this).children();
+                        if (targetColumn > currentColumn) {
+                            for (let i = currentColumn; i < targetColumn; i++) {
+                                let cellToMove = cells.eq(i);
+                                let nextCell = cells.eq(i + 1);
+                                cellToMove.insertAfter(nextCell);
+                            }
+                        } else {
+                            for (let i = currentColumn; i > targetColumn; i--) {
+                                let cellToMove = cells.eq(i);
+                                let prevCell = cells.eq(i - 1);
+                                cellToMove.insertBefore(prevCell);
+                            }
+                        }
+                    });
+                    currentColumn = targetColumn;
+                }
+            });
+
+            $(document).on('mouseup', function() {
+                if (isMouseDown) {
+                    isMouseDown = false;
+                    $('th').removeClass('active-column');
+                    // Ensure columns are rearranged smoothly by resetting the table layout
+                    $('#table').css('table-layout', 'fixed');
+                    setTimeout(function() {
+                        $('#table').css('table-layout', 'auto');
+                    }, 0);
+                }
+            });
+            });
+            </script>
+
+<!-- --------------------------------------------------------------------------------------------------------------------------------------- -->
+                

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internal Status History for {{ shot }}</title>
+</head>
+<body style="font-family: 'Roboto', sans-serif;">
+    <h1>Shot History - {{ shot.shot_name }}</h1>
+<ul>
+    {% for entry in history_entries %}
+        <li>{{ entry.internal_status }} - {{ entry.change_date }}</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

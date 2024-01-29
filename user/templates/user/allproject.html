@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <title> PMS: Production </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/allproject.css' %}">
+    </head>
+
+    <body style="font-family: 'Roboto', sans-serif;"> 
+        {% include "user/navbaradmin.html" %}
+        <br>
+        <br>
+        
+            <div class="p-2 mb-2 text-black" style = 'margin-top:5px;'>
+                <div style = 'display: inline-block;'>
+                    <a href="{% url 'addproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark mx-1 btn-sm fixed-width-btn">Add Project</a>
+                    <a href="{% url 'importdata' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark mx-1 btn-sm fixed-width-btn">Import</a>
+                    <a href="{% url 'allshot' %}"        style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark mx-1 btn-sm fixed-width-btn">Task</a>
+                    <a href="{% url 'viewissuedshot' %}" style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark mx-1 btn-sm fixed-width-btn">Artist</a>
+                    <a href="{% url 'mang_message1' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark mx-1 btn-sm fixed-width-btn">Management</a>
+                </div>
+
+                <div style = 'display: inline-block; margin-left:300px; color:white'>
+                    <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 130px; height:25px;">All Projects </h5>
+                </div>
+            </div>
+
+        {% if projects %}
+
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Project Name</th>
+                        <th>Number of Shots</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            
+                <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'pshots' project.project_name %}" title="Click here" >{{ project.project_name }}</a></td>
+                            <td>{{ project.num_shots }}</td>
+                            <td>
+                                {% if user.is_authenticated and user.username == "maheshb" %}
+                                    <a href="{% url 'delete_project' project.project_name %}" 
+                                        onclick="return confirm('Are you sure, you want to delete this project and corresponding all shots?')"
+                                        class="text-danger"  title="Click here to remove project ({{project.project_name}})">x
+                                    </a>
+                                {% else %}
+                                    <a href="#" 
+                                        onclick="return confirm('You do not have access to delete this project !')"
+                                        class="text-warning" title="Click here to remove project ({{project.project_name}})">x
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    
+                    <tr id="total-row">
+                        <td colspan="2"><strong>Total Shots:</strong></td>
+                        <td id="total-shots"></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <!-- <div class="centered-text">
+                <h6 style='color:rgb(244, 42, 237);'>Projects Not Available !</h6>
+            </div> -->
+
+            <div class="centered-text">
+                <h5>Projects Not Available !</h5>
+            </div>
+        {%endif%}
+    </body>
+</html><br>
+
+<!-- ------------------------------------------------------------------------------------------------------------------        -->
+                             <!-- Count total no. of shots -->
+
+<script>
+    var totalShots = 0;
+    var numShotsElements = document.querySelectorAll('#table tbody td:nth-child(3)');
+    for (var i = 0; i < numShotsElements.length; i++) {
+        totalShots += parseInt(numShotsElements[i].textContent);
+    }
+
+    var totalShotsElement = document.getElementById('total-shots');
+    totalShotsElement.textContent = totalShots.toString();
+</script>
+
+
+<!-- -------------------------------------------------------------------------------------------------------------------------- -->
+
+
+                                   

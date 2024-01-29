@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <title>PMS: Home </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/navbarstudent.css' %}">
+
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/popper.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        <!-- <nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top"> -->
+        <nav class="navbar navbar-expand-md bgcolor fixed-top">
+            <img src="{% static 'images/OS_3d.jpeg' %}" class="rounded-circle mx-1" alt="PMS" width="40" height="40"  title="OS logo">
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse"> <span class="navbar-toggler-icon"></span> </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <a href="/" class="nav-item nav-link active" style="color:rgb(241, 235, 227)">Home</a>
+                
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-item nav-link active dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:rgb(241, 235, 227)">Shot</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'viewissuedshotbyartist' %}" class="dropdown-item">Assigned Shot</a></li>
+                            <li><a href="{% url 'popup_message' %}" class="dropdown-item">Messages</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-item nav-link active dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:rgb(241, 235, 227)">Artist</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'allartist1' %}" class="dropdown-item">All Artist</a></li>
+                        </ul>
+                    </div>
+                </div>                    
+
+                
+                {% if messages %}
+                    <div id="messages-container" style="white-space: nowrap; margin-left: 40px;"> 
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}" style="color: rgb(61, 204, 244);" {% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="fix-btn">
+                    <form class="d-flex" method="get" action="{% url 'search_all_artist' %}">
+                        <input style='border-radius: 25px; text-align: center; background:rgb(241, 235, 227)' class="form-control me-2" type="search" name="p" placeholder="Type to search ..." aria-label="Search">
+                        <!-- <button style='border-radius: 25px; text-align: center;' class="btn btn-outline-info btn-sm" type="submit" title="Click here to search">&#128269;</button> -->
+                        <button style='font-size: 20px; text-align: center; border: none; background: none;' class="btn btn-sm" type="submit" title="Click here to search">&#128269;</button>
+                    </form>
+                </div>
+
+                <div id="empty-search-popup" class="empty-search-popup"> Please enter text before searching... </div>
+
+                <!-- <div class="navbar-nav profile-dropdown">
+                    <div class="nav-item dropdown">
+                        <a class="nav-item nav-link active dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.first_name}} {{ user.last_name}}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#" id="openPopup1">Online Artist</a></li>
+                            <li><a class="dropdown-item" href="{% url 'changepass' %}">Change Password</a></li> 
+                            <li><a class="dropdown-item" href="{% url 'userupdate' %}">Change Email</a></li> 
+                            <li><a class="dropdown-item" href="/studentlogout">Logout</a></li>
+                        </ul>
+                    </div>
+                </div> -->
+
+                <div class="navbar-nav profile-dropdown">
+                    <div class="nav-item dropdown d-flex align-items-center">
+                        <a href="#" style="color:rgb(241, 235, 227)">{{ user.first_name}} {{ user.last_name}}</a>
+                        <a class="nav-item nav-link active " href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:rgb(241, 235, 227)">
+                            <span id="dropdown-arrow" title="Click here">☰</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#" id="openPopup1">Online Artist</a></li>
+                            <li><a class="dropdown-item" href="{% url 'changepass' %}">Change Password</a></li>
+                            <li><a class="dropdown-item" href="{% url 'userupdate' %}">Change Email</a></li>
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="popup1" class="popup1">
+                    <div class="popup1-content">
+                        <span id="closePopup" style="float: right; cursor: pointer; font-size: 40px;" title="Close">&times;</span>
+                        <iframe src="{% url 'logged_in_artist' %}" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </body>
+</html>
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+                               <!-- Search empty text -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+  const searchForm = document.querySelector(".d-flex");
+  const searchInput = document.querySelector("input[type='search']");
+  const emptySearchPopup = document.getElementById("empty-search-popup");
+
+  searchForm.addEventListener("submit", function (event) {
+    if (searchInput.value.trim() === "") {
+      event.preventDefault(); 
+      emptySearchPopup.style.display = "block";
+
+
+      setTimeout(function () {
+        emptySearchPopup.style.display = "none";
+      }, 3000); 
+    }
+  });
+});
+</script>
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+                                            <!-- Online artist popup -->
+
+<script>
+    document.getElementById("openPopup1").addEventListener("click", function () {
+    document.getElementById("popup1").style.display = "block";
+    });
+
+
+    document.getElementById("closePopup").addEventListener("click", function () {
+    document.getElementById("popup1").style.display = "none";
+    });
+</script>
+
+<!-- ---------------------------------------------------------------------------------------------- -->
+
+<script>
+    setTimeout(function() {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 3000); 
+</script>

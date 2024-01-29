@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <title>PMS</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/pshots.css' %}">
+    </head>
+
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbaradmin.html" %} <br><br><br>
+
+        <h4>Updated Shot History - {{ shot.shot_name }}</h4>
+
+        {% for i in history %}
+            <p>
+                <strong>Updated By:</strong> {{ i.updated_by.username }}<br>
+                <strong>Field Name:</strong> {{ i.field_name }}<br>
+                <strong>Previous Value:</strong> {{ i.previous_value }}<br>
+                <strong>Updated Value:</strong> {{ i.updated_value }}<br>
+                <strong>Updated Date:</strong> {{ i.updated_at }}<br>
+            </p>
+        {% endfor %}
+
+</body>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <title>PMS: {{ project_name }}</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/pshots1.css' %}">
+    </head>
+
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbarstudent.html" %}
+    <br>
+    <br>
+    <!-- <h3 class="p-3 mb-2 bg-info text-black" style = 'font-size: 20px;text-align:center;'>Project : {{ project_name | upper }}</h3> -->
+    <!-- <h3 class="p-3 mb-2 bg-info text-black" style='font-size: 18px; text-align: center; position: relative;'>
+        Project: {{ project_name | upper }}
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 10px; right: 0;">Added Date: {{ project_added_date | date:"d/m/Y" }}</span></small>
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 30px; right: 0;">TGT Date: {{ project_TGT_Date | date:"d/m/Y"}}</span></small>
+    </h3> -->
+
+    <div class="p-3 mb-2 text-black" style='font-size: 18px; text-align: center; position: relative;'>
+        <div style = 'display: inline-block; font-size: 18px;  color:white'>
+            <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 300px; height:25px; ">Project: {{ project_name | upper }}</h5>
+        </div>
+        
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 10px; right: 0;">Added Date: {{ project_added_date | date:"d/m/Y" }}</span></small>
+        <small><span class="date-info right-corner-text" style="position: absolute; top: 30px; right: 0;">TGT Date: {{ project_TGT_Date | date:"d/m/Y"}}</span></small>
+    </div>
+
+        {% if shots %}
+                
+                <table class="redTable" id="table">
+                    <thead>
+                        <tr>
+                            <th>Sr.No</th>
+                            <th><span>Shot Name       </span>  </th>
+                            <th><span>Shot Version    </span>  </th>
+                            <th><span>Scope of Work   </span>  </th>
+                            <th><span>Dependency      </span>  </th>
+                            <th><span>Internal Status </span>  </th>
+                            <th><span>Client Status   </span>  </th> 
+                            <th><span>Comp Status     </span>  </th>    
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shot in shots %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+
+                            <!-- <td>
+                                <a href="{% url 'get_review_approval_info' shot.id %}"
+                                    onclick="showShotInfo( '{{ shot.reviewed_date }}', '{{ shot.approved_date }}')"
+                                    title="Click here to view shot info">{{ shot.shot_name }}
+                                </a>
+                            </td> -->
+
+                            <td>
+                                <a href="javascript:void(0);" onclick="openPopup(`{% url 'get_review_approval_info' shot.id %}`)"
+                                    title="Click here to view shot info">{{ shot.shot_name }}
+                                </a>
+                            </td>
+                            
+                            <!-- <div id="popup-container1" class="popup-container1">
+                                <div class="popup-content1">
+                                    <span class="close-button1" onclick="closePopup()" title="Close">&times;</span>
+                                    <iframe id="popup-iframe" src="" frameborder="0"></iframe>
+                                </div>
+                            </div> -->
+
+                            <div id="popup-container1" class="popup-container1"  onclick="closePopupz(event)">
+                                <div class="popup-content1" onclick="event.stopPropagation();">
+                                    <span class="close-button1" onclick="closePopupz()" title="Close">&times;</span>
+                                    <iframe id="popup-iframe" src="" frameborder="0"></iframe>
+                                </div>
+                            </div>
+
+                            <td>{{ shot.shot_version}}</td>
+                            <td class="description-cell">{{ shot.work_description }}</td>
+                            <td>{{ shot.dependency|safe }}</td>
+                            <td>{{ shot.internal_status }}</td>
+                            <td>{{ shot.client_status }}</td>
+                            <td>{{ shot.comp_status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        {% else %}
+            <h6> Shots Not Available </h6>
+        {%endif%}
+ 
+  </body>
+</html>
+
+
+<div class="pagination" style="float: right;">
+    <span class="step-links">
+        {% if shots.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <!-- <a href="?page={{ shots.previous_page_number }}">previous</a> -->
+        {% endif %}
+
+        {% for i in shots.paginator.page_range %}
+            <span class="{% if i == shots.number %}current{% endif %}">
+                <a href="?page={{ i }}">{{ i }}</a>
+            </span>
+        {% endfor %}
+
+        {% if shots.has_next %}
+            <!-- <a href="?page={{ shots.next_page_number }}">next</a> -->
+            <a href="?page={{ shots.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+<!-- ------------------------------------------------------------------------------------------------------------------------------- -->
+                <!-- column search box -->
+
+                            
+                <!-- <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const table = document.getElementById('table');
+                        const headers = table.getElementsByTagName('th');
+                        const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+                
+                        // Update filter symbols and apply stored filters
+                        for (let i = 1; i < headers.length - 1; i++) {
+                            const filterSymbol = document.createElement('span');
+                            filterSymbol.innerHTML = '<span style="font-size: smaller;">&#9660;</span>';
+                            filterSymbol.style.cursor = 'pointer';
+                            filterSymbol.onclick = function () {
+                                showFilterDropdown(i);
+                            };
+                            headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+                            headers[i].appendChild(filterSymbol);
+                
+                            // Check if a filter is applied to this header
+                            if (storedFilters[i] && storedFilters[i] !== 'all') {
+                                applyFilter(i, storedFilters[i]);
+                                // Highlight the filter symbol for this header
+                                highlightFilterSymbol(i, '#ffcc00');  // Change color to your preference
+                            }
+                        }
+                
+                        function showFilterDropdown(columnIndex) {
+                            // Check if the dropdown is already open
+                            const existingDropdown = document.getElementById('filterDropdown');
+                            if (existingDropdown) {
+                                // Dropdown is open, close it
+                                document.body.removeChild(existingDropdown);
+                                return;
+                            }
+                
+                            const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+                            const dropdown = document.createElement('select');
+                            dropdown.id = 'filterDropdown'; // Set an ID to easily identify the dropdown
+                            dropdown.innerHTML = '<option value="all" style="text-align:center">All</option>';
+                
+                            // Modify to create a multiple selection dropdown
+                            dropdown.multiple = true;
+                
+                            values.forEach(value => {
+                                const option = document.createElement('option');
+                                option.value = value;
+                                option.text = value;
+                                dropdown.add(option);
+                            });
+                
+                            // Set selected values from stored filters
+                            if (storedFilters[columnIndex] && storedFilters[columnIndex] !== 'all') {
+                                const selectedValues = storedFilters[columnIndex].split(',');
+                                Array.from(dropdown.options).forEach(option => {
+                                    option.selected = selectedValues.includes(option.value);
+                                });
+                            }
+                
+                            dropdown.onchange = function () {
+                                const selectedOptions = Array.from(this.options).filter(option => option.selected);
+                                const selectedValues = selectedOptions.map(option => option.value).join(',');
+                
+                                applyFilter(columnIndex, selectedValues);
+                
+                                // Highlight the filter symbol for this header
+                                if (selectedValues === 'all') {
+                                    highlightFilterSymbol(columnIndex, ''); // Remove highlight when 'All' is selected
+                                } else {
+                                    highlightFilterSymbol(columnIndex, '#ffcc00'); // Change color to your preference
+                                }
+                
+                                document.body.removeChild(dropdown);
+                            };
+                
+                            const filterSymbol = headers[columnIndex].lastChild;
+                            const rect = filterSymbol.getBoundingClientRect();
+                            dropdown.style.position = 'absolute';
+                            dropdown.style.top = rect.bottom + 'px';
+                            dropdown.style.left = rect.left + 'px';
+                            document.body.appendChild(dropdown);
+                        }
+                
+                
+                
+                        function applyFilter(columnIndex, filterValue) {
+                            storedFilters[columnIndex] = filterValue;
+                            for (let i = 1; i < table.rows.length; i++) {
+                                let rowMatchesFilters = true;
+                                for (const index in storedFilters) {
+                                    const cellValue = table.rows[i].cells[index].textContent;
+                                    const filterValues = storedFilters[index].split(',');
+                                    if (storedFilters[index] !== 'all' && !filterValues.includes(cellValue)) {
+                                        rowMatchesFilters = false;
+                                        break;
+                                    }
+                                }
+                                table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+                            }
+                            sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+                        }
+                
+                        function highlightFilterSymbol(columnIndex, color) {
+                            // Change the color of the filter symbol for the specified header
+                            const filterSymbol = headers[columnIndex].lastChild;
+                            filterSymbol.style.color = color;
+                        }
+                
+                        
+                    });
+                </script> -->
+
+<!--                  
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('table');
+    const headers = table.getElementsByTagName('th');
+    const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+
+    // Update filter symbols and apply stored filters
+    for (let i = 1; i < headers.length - 1; i++) {
+        const filterSymbol = document.createElement('span');
+        filterSymbol.innerHTML = ' &#9660;';
+        filterSymbol.style.cursor = 'pointer';
+        filterSymbol.onclick = function () {
+            showFilterDropdown(i);
+        };
+        headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+        headers[i].appendChild(filterSymbol);
+
+        // Check if a filter is applied to this header
+        if (storedFilters[i] && storedFilters[i] !== 'all') {
+            applyFilter(i, storedFilters[i]);
+            // Highlight the filter symbol for this header
+            highlightFilterSymbol(i, '#ffcc00');  // Change color to your preference
+        }
+    }
+
+    function showFilterDropdown(columnIndex) {
+        const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+        const dropdown = document.createElement('select');
+        dropdown.innerHTML = '<option value="all">All</option>';
+
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.text = value;
+            dropdown.add(option);
+        });
+
+        dropdown.value = storedFilters[columnIndex] || 'all';
+
+        dropdown.onchange = function () {
+            applyFilter(columnIndex, this.value);
+            // Highlight the filter symbol for this header
+            highlightFilterSymbol(columnIndex, '#ffcc00');  // Change color to your preference
+            document.body.removeChild(dropdown);             // dropdown auto remove after filter applied
+        };
+
+        const filterSymbol = headers[columnIndex].lastChild;
+        const rect = filterSymbol.getBoundingClientRect();
+        dropdown.style.position = 'absolute';
+        dropdown.style.top = rect.bottom + 'px';
+        dropdown.style.left = rect.left + 'px';
+        document.body.appendChild(dropdown);
+    }
+
+    function applyFilter(columnIndex, filterValue) {
+        storedFilters[columnIndex] = filterValue;
+
+        for (let i = 1; i < table.rows.length; i++) {
+            let rowMatchesFilters = true;
+            for (const index in storedFilters) {
+                const cellValue = table.rows[i].cells[index].textContent;
+                if (storedFilters[index] !== 'all' && cellValue !== storedFilters[index]) {
+                    rowMatchesFilters = false;
+                    break;
+                }
+            }
+            table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+        }
+
+        sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+    }
+
+    function highlightFilterSymbol(columnIndex, color) {
+        // Change the color of the filter symbol for the specified header
+        const filterSymbol = headers[columnIndex].lastChild;
+        filterSymbol.style.color = color;
+    }
+});
+
+</script> -->
+                    
+<!-- ------------------------------------------------------------------------------------------------------------------------------- -->
+                     <!-- Auto refresh after 300 sec -->
+
+<script>
+    // After 300 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>
+
+<!-- ----------------------------------------------------------------------------------------------------------------------------- -->
+
+
+<!-- popup for shot info  outside click close -->
+
+<script>
+    function openPopup(url) {
+    var popupContainer = document.getElementById('popup-container1');
+    var popupIframe = document.getElementById('popup-iframe');
+
+    popupIframe.src = url;
+    popupContainer.style.display = 'block';
+
+    document.body.addEventListener('click', closePopupzOutside);
+    }
+
+    function closePopupz() {
+        var popupContainer = document.getElementById('popup-container1');
+        popupContainer.style.display = 'none';
+    }
+</script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------------------- -->

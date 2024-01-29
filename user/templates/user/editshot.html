@@ -1,0 +1,33 @@
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PMS: Production</title>
+	<link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/editshot.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+		{% include "user/navbaradmin.html" %}
+		<br>
+		<br>
+		<div class="signup-form">
+			<form  method="post" class="form-horizontal" style="color:black; background-color:#e3dede;">
+					<center><h5  style='color:black;'>EDIT SHOT</h5></center>
+
+					{% csrf_token %}
+					{{ form | crispy }}
+
+				<div class="form-group">
+					<div class="col-xs-8 col-xs-offset-4">
+						<button type="submit" style="border-radius: 25px;" class="btn btn-outline-primary btn-lg">Update</button>
+					</div>
+				</div>
+			
+				<div style='color:black;'>View Available Shot In System <a style='color:blue;' href="{% url 'allshot' %}"> Click here</a></div>
+			</form>
+		</div>
+  </body>
+</html>

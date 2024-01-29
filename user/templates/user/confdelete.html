@@ -1,0 +1,33 @@
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PMS: Task Assign </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/issueshot.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %} <br> <br> <br>
+    
+    <h2>Confirmation</h2>
+    <p> Same Shot already assigned in same department</p>
+
+    <ul>
+      {% for existing_shot in existing_shots %}
+        <li>Already assigned shot <b>{{ existing_shot.shot_name }}</b> to <b>{{ existing_shot.artist }}</b> on date <b>{{ existing_shot.issuedate }}</b> with ETA <b>{{ existing_shot.eta }}</b></li>
+      {% endfor %}
+    </ul>
+  
+    <p>Do you want to replace it ?</p>
+  
+    <form method="post" action="{% url 'confirm_replace_shot' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for key, value in new_shot.items %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+      {% endfor %}
+      <button type="submit" name="replace" value="yes">Yes</button>
+      <button type="submit" name="replace" value="no">No</button>
+    </form>
+  </body>
+</html>

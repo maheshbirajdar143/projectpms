@@ -1,0 +1,63 @@
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PMS: Re-assigned </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reissueshot.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+
+        {% include "user/navbaradmin.html" %}
+        <br>
+        <br>
+            <!-- <center><h3 style=" margin-bottom: 0px;"class = 'alert alert-success'>Shot Re-assign to Artist!</h3></center> -->
+        <div class="signup-form"> 
+            <form  method="post" class="form-horizontal" enctype="multipart/form-data" style="color:black; background-color:#e3dede;">
+                <center><h5>Shot Re-assign By Sup/Mang </h5></center>
+
+                    {% csrf_token %}
+                    {{ form | crispy }}
+                        
+                    <div class="form-group">
+                        <div class="col-xs-8 col-xs-offset-4">
+                            <button type="submit" style="border-radius: 25px;" class="btn btn-outline-primary btn-lg">Re-assign</button>
+
+                            <a href="{% url 'mang_message1' %}">
+                                <button type="button"  style="border-radius: 25px;" class="btn btn-outline-primary btn-lg">&#8592; Back</button>
+                            </a>
+                        </div>
+                    </div>
+            </form>
+        </div>
+  </body>
+</html>
+
+<!-- -------------------------------------------------------------------------------------------------------------------- -->
+                            <!-- All artist display as per department wise  -->
+
+<script>
+$(document).ready(function() {
+    $('#id_department1').change(function() {
+        var selectedDepartment = $(this).val();
+        $.ajax({
+            url: "{% url 'get_artists_by_department' %}",
+            data: { department: selectedDepartment },
+            dataType: 'json',
+            success: function(data) {
+                var artist1Field = $('#id_artist1');
+                artist1Field.empty();
+                $.each(data.artists, function(index, artist) {
+                    artist1Field.append($('<option>', {
+                        value: artist[0],
+                        text: artist[1]
+                    }));
+                });
+            }
+        });
+    });
+});
+</script>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/search1.css' %}">
+    </head>
+
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %}
+    <br>
+    <br>
+    <br>
+
+        {% if shots %}
+        <table class="redTable" id="table">
+            <thead>
+                <tr>
+                    <th>Sr.No</th>
+                    <th>Shot Name      </th>
+                    <th>Scope of Work  </th>
+                    <th>Created Date   </th>
+                    <th>TGT Date       </th>
+                    <th>Dependency     </th> 
+                    <th>Assignment     </th>
+                    <th>Int. Status    </th> 
+                    <th>Final Status   </th>
+                    <th>Remark         </th>
+                    <th>Client Status  </th>
+                    <th>Edit</th>
+
+                    {% if shots %}
+                        {% for column_name in shots.0.added_column %}
+                            <th>{{ column_name }}</th>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for shot in shots %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ shot.shot_name }}</td>
+                    <td class="description-cell">{{ shot.work_description }}</td>
+                    <td>{{ shot.date_started | date:"d/m/Y" }}</td>
+                    <td>{{ shot.eta | date:"d/m/Y" }}</td>
+                    <td class="description-cell">{{ shot.dependency|safe }}</td>
+
+                    <td>
+                        {% if shot.work_status == 'Assigned'  %}
+                            <span style="color: orange;">{{ shot.work_status }}</span>
+                        {% else %}
+                            <span style="color: red;">{{ shot.work_status }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if shot.internal_status == 'READY FOR REVIEW' %}
+                            <span style="color: green;"> {{shot.internal_status}}</span> 
+                        {% elif shot.internal_status == 'REVIEWED' %}
+                            <span style="color: #4dc3ff;;">{{shot.internal_status}} </span> 
+                        {% elif shot.internal_status == 'WIP' %}
+                            <span style="color: orange;">{{shot.internal_status}} </span> 
+                        {% elif shot.internal_status == 'HOLD' or shot.internal_status == 'OMMIT' %}
+                            <span style="color: #ff4de1;">{{ shot.internal_status }}</span>
+                        {% elif shot.internal_status == 'YTS' %}
+                            <span style="color: red;">{{shot.internal_status}} </span>   
+                        {% else %}    
+                            <span>{{shot.internal_status}} </span>                                                        
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if shot.final_status == 'APPROVED' %}
+                            <span style="color: green;">{{ shot.final_status }}</span>
+                        {% else %}
+                            <span style="font-size: 13px;">⌛️</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="description-cell1"> {{ shot.remark }} </td>
+                    <td> {{ shot.client_status }}</td>
+
+                    <td>                                
+                        <a href="{% url 'editshot' shot.id %}" class="text-success"
+                            onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">Edit</i> 
+                        </a>
+                    </td>
+
+                    {% if shots %}
+                        {% for column_name, column_value in shot.added_column.items %}
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shot_id" value="{{ shot.id }}">
+                                    <input type="hidden" name="column_name" value="{{ column_name }}">
+                                    <input type="text" name="column_value_{{ shot.id }}_{{ column_name }}" value="{{ column_value|default:'' }}">
+                                    <input type="submit" value="Save">
+                                </form>
+                            </td>
+                        {% endfor %}
+                    {% endif %}
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <h6> Shots Not Available </h6>
+        {% endif %}    
+  </body>
+</html>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                    <!-- highlighted shot name  -->
+      
+                <script>
+                    function highlightShot(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(1)').addClass('highlight');
+                    }
+
+                    function removeHighlight(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(1)').removeClass('highlight');
+                    }
+                </script>
+            
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                        <!-- new column movement -->
+
+                        <script>
+                            $(document).ready(function() {
+                                let isMouseDown = false;
+                                let currentColumn;
+                                let originalColumnIndex;
+
+                                $('th').on('mousedown', function() {
+                                    isMouseDown = true;
+                                    currentColumn = $(this).index();
+                                    originalColumnIndex = currentColumn;
+                                    $(this).addClass('active-column');
+                                });
+
+                                $('th').on('mousemove', function() {
+                                    if (isMouseDown && currentColumn !== $(this).index()) {
+                                        let targetColumn = $(this).index();
+                                        $('tr').each(function() {
+                                            let cells = $(this).children();
+                                            if (targetColumn > currentColumn) {
+                                                for (let i = currentColumn; i < targetColumn; i++) {
+                                                    let cellToMove = cells.eq(i);
+                                                    let nextCell = cells.eq(i + 1);
+                                                    cellToMove.insertAfter(nextCell);
+                                                }
+                                            } else {
+                                                for (let i = currentColumn; i > targetColumn; i--) {
+                                                    let cellToMove = cells.eq(i);
+                                                    let prevCell = cells.eq(i - 1);
+                                                    cellToMove.insertBefore(prevCell);
+                                                }
+                                            }
+                                        });
+                                        currentColumn = targetColumn;
+                                    }
+                                });
+
+                                $(document).on('mouseup', function() {
+                                    if (isMouseDown) {
+                                        isMouseDown = false;
+                                        $('th').removeClass('active-column');
+                                        // Ensure columns are rearranged smoothly by resetting the table layout
+                                        $('#table').css('table-layout', 'fixed');
+                                        setTimeout(function() {
+                                            $('#table').css('table-layout', 'auto');
+                                        }, 0);
+                                    }
+                                });
+                            });
+                        </script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                              
+                

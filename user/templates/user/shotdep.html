@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shot Department Notes</title>
+</head>
+<body style="font-family: 'Roboto', sans-serif;">
+
+<h3 style="text-align: center;">Shot Name : {{ shot.shot_name }}</h3>
+
+<h4>Assigned Department </h4>
+    {% if dep_notes %}
+    
+        <ul>
+            {% for dep_note in dep_notes %}
+                <li>{{ dep_note.depnotes }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <ul><li>Not assigned to any department</li></ul>
+    {% endif %}
+
+<!-- ------------------------------------------------------------------- -->
+
+<h4>Status Received Department </h4>
+{% if rec_notes %}
+
+    <ul>
+        {% for rec_note in rec_notes %}
+            <li>{{ rec_note.recdepnotes }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <ul><li>Not received any status from department</li></ul>
+{% endif %}
+
+</body>
+</html>

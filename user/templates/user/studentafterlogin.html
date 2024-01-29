@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+      <title> PMS: Home</title>
+      <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'css/studentafterlogin.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbarstudent.html" %}
+    <br>
+    <br>
+    <!-- <h4 style=" margin-bottom: 0px; text-align:center;" class="p-3 mb-2 text-black">Welcome To Project Management System </h4> -->
+    <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 450px; height:55px; margin-left: 730px; margin-top: 10px;" class="p-3 mb-2 text-white">Welcome To Project Management System</h5>
+    <div class="jumbotron" style="margin-bottom: 0px;">
+    <h5 style="text-align:center;">Hello {{user.first_name}}...  <small><i>How are you today ?</small></i>   </h5><br>
+
+    <!-- <hr class="my-4"> -->
+
+    <div class="options" style="text-align:center">
+      <!-- <p><b> As you are <ins>Artist</ins>, Options Available For You !</b></p> -->
+      
+      <div class="button-container">
+        <a href="{% url 'allproject_artist' %}"         style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">All Project</a>
+        <a href="{% url 'viewissuedshotbyartist' %}"    style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Assign Shot </a>
+        <a href="{% url 'popup_message' %}"             style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Messages</a>
+      </div>
+
+    </div>
+  </body>
+</html>
+

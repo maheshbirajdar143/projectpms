@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title> PMS: Import Excel </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/importdata.css' %}">
+    <script src="{% static 'js/full.min.js' %}"></script>
+</head>
+
+<body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %}<br><br>
+
+    <div class="p-2 mb-2 text-black" style = 'margin-top:5px'>
+        <div style = 'display: inline-block;'>
+            <a href="{% url 'allproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production</button> </a>
+            <a href="{% url 'allshot' %}"        style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Task</button> </a>
+            <a href="{% url 'viewissuedshot' %}" style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Artist</a>
+            <a href="{% url 'mang_message1' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Management</button> </a>
+        </div>
+        <!-- <div style = 'display: inline-block; font-size: 18px; margin-left:500px'><h5>Import Excel Data </h5></div> -->
+    </div>
+    
+    <div class="signup-form">
+        <form id="importForm"  style="background-color:rgb(239, 233, 233);" action="{% url 'importdata' %}?text=Production" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h5 style="color: black; text-align: center;" >Import Excel Data </h5><br>
+            <input type="file" name="file" id="excelFile"> 
+            <input type="button" id="previewButton" value="Preview" onclick="previewExcel()">
+            <input type="submit" id="importButton" value="Import" onclick="showLoading()" style="display: none;"><br><br>
+            &bull; <b><small>Upload only excel file &#8594; <i> ( Master.xlsx ) </i></small></b><br>
+            &bull; <b><small>Date Format Should be  &#8594; <i> ( YYYY-MM-DD) </i></small></b> 
+        </form>
+
+        <div id="previewTable" style="display: none; max-height: 500px; overflow-y: scroll;"> {{ preview|safe }}</div>
+        <div class="ring" id="loading" style="display: none;">Uploading <span></span></div>
+    </div>
+
+    {% if message %}
+        <div id='messages-container' class="alert alert-success" role="alert" id="messageSection">{{ message }} </div>
+    {% endif %}
+
+</body>
+</html>
+
+<script>
+    function previewExcel() {
+        var fileInput = document.getElementById('excelFile');
+        var file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a file before previewing.');
+            return;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var data = new Uint8Array(e.target.result);
+            var workbook = XLSX.read(data, { type: 'array' });
+            var sheet = workbook.Sheets[workbook.SheetNames[0]];
+            var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            // Load previously imported details from local storage
+            var importedDetails = JSON.parse(localStorage.getItem('importedDetails')) || {};
+
+            // Create a container with fixed height and overflow-y: scroll
+            var container = "<div style='height: 400px; width:800px; overflow-y: scroll;'>";
+            container += "<table class='table table-bordered table-striped table-fixed-header' padding:5px>";
+            container += "<thead style='position: sticky; top: 0; padding:5px' class='thead-dark'><tr>";
+
+            for (var i = 0; i < jsonData[0].length; i++) {
+                // Skip specific columns
+                if (jsonData[0][i] !== 'Date Created' && jsonData[0][i] !== 'TGT Date' && jsonData[0][i] !== 'Assign' && jsonData[0][i] !== 'Internal Status') {
+                    container += "<th>" + jsonData[0][i] + "</th>";
+                }
+            }
+            container += "</tr></thead>";
+
+            // Add data rows
+            container += "<tbody>";
+            
+            var messageDisplayed = false;
+
+            for (var i = 1; i < jsonData.length; i++) {
+                container += "<tr>";
+
+                var detailsHash = JSON.stringify(jsonData[i]);
+                // Check if details have been previously imported
+                if (!importedDetails[detailsHash]) {
+                    for (var j = 0; j < jsonData[i].length; j++) {
+                        // Skip specific columns
+                        if (jsonData[0][j] !== 'Date Created' && jsonData[0][j] !== 'TGT Date' && jsonData[0][j] !== 'Assign' && jsonData[0][j] !== 'Internal Status') {
+                            container += "<td>" + jsonData[i][j] + "</td>";
+                        }
+                    }
+                    // Mark details as imported
+                    importedDetails[detailsHash] = true;
+                }else {
+                    // Display message only once
+                    if (!messageDisplayed) {
+                        container += "<td colspan='" + (jsonData[i].length - 3) + "' style='text-align:center;'>Details already saved</td>";
+                        messageDisplayed = true;
+                    } else {
+                        container += "";  // Placeholder for the hidden/empty details
+                    }
+                }
+
+                container += "</tr>";
+            }
+            container += "</tbody>";
+            container += "</table>";
+            container += "</div>";
+
+            // Save imported details to local storage
+            localStorage.setItem('importedDetails', JSON.stringify(importedDetails));
+
+            document.getElementById("previewTable").innerHTML = container;
+            document.getElementById("previewTable").style.display = "block";
+            document.getElementById("previewButton").style.display = "none";
+            document.getElementById("importButton").style.display = "";
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+
+
+<script>
+    function showLoading() {
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("messageSection").style.display = "none";
+    }
+</script>
+
+

@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+<head>
+    <title> PMS: Manday </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/manday.css' %}">
+</head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbaradmin.html" %} <br><br>
+
+        <div class="p-2 mb-2 text-black" style="font-size: 18px;">
+            <div style = 'display: inline-block;'>
+                <a href="{% url 'allproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                <a href="{% url 'allshot' %}"        style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Task </a>
+                <a href="{% url 'viewissuedshot' %}" style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Artist </a>
+                <a href="{% url 'mang_message1' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn"> Management </a>
+            </div>
+
+            <div style = 'display: inline-block; margin-left:500px; margin-top:5px; color:white'>
+                <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 110px; height:25px;">Mandays</h5>
+            </div>
+        </div>
+
+        {% if issued_shots %}
+
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr No</th>
+                         <th><span>Shot Name              </span></th>
+                         <th><span>Assigned Departments   </span></th>
+                         <th><span>Total Overdues         </span></th>
+                         <th><span>Total Mandays          </span></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shot_name, data in shot_departments.items %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{ shot_name }}</td>
+                            <td>
+                                {% for department, i in data.departments.items %}
+                                    <b>{{ department }}</b> <i>(O={{i.overdue}} & M={{i.manday}})</i> {% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ data.total_overdue }}</td>
+                            <td>{{ data.total_manday }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <!-- <div class="centered-text">
+                <h6 style='color:rgb(244, 42, 237);'>Yet no shots assigned !</h6>
+            </div> -->
+
+            <div class="centered-text">
+                <h5>Yet no shots assigned !</h5>
+            </div>
+        {%endif%} 
+            
+    </body>
+</html>
+
+
+<!-- ----------------------------------------------------------------------------------------------------------- -->
+                                <!-- column search box -->
+
+<script>
+    $(document).ready(function () {
+        $('.filter-input').on('input', function () {
+            const columnIndex = $(this).closest('th').index();
+            const searchTerm = $(this).val().toLowerCase().trim();
+            const rows = $('#table tbody tr');
+
+            rows.each(function () {
+                const cellValue = $(this).find('td').eq(columnIndex).text().toLowerCase();
+                if (cellValue.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+</script>
+
+<!-- ------------------------------------------------------------------------------------------------------------- -->
+
+
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.getElementById('table');
+        const headers = table.getElementsByTagName('th');
+        const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+
+        // Update filter symbols and apply stored filters
+        for (let i = 1; i < headers.length - 1; i++) {
+            const filterSymbol = document.createElement('span');
+            filterSymbol.innerHTML = '&#9660;';
+            filterSymbol.style.cursor = 'pointer';
+            filterSymbol.onclick = function () {
+                showFilterDropdown(i);
+            };
+            headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+            headers[i].appendChild(filterSymbol);
+
+            if (storedFilters[i] && storedFilters[i] !== 'all') {
+                applyFilter(i, storedFilters[i]);
+            }
+        }
+
+        function showFilterDropdown(columnIndex) {
+            const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+            const dropdown = document.createElement('select');
+            dropdown.innerHTML = '<option value="all">All</option>';
+
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.text = value;
+                dropdown.add(option);
+            });
+
+            dropdown.value = storedFilters[columnIndex] || 'all';
+
+            dropdown.onchange = function () {
+                applyFilter(columnIndex, this.value);
+                document.body.removeChild(dropdown);             // dropdown auto remove after filter applied
+            };
+
+            const filterSymbol = headers[columnIndex].lastChild;
+            const rect = filterSymbol.getBoundingClientRect();
+            dropdown.style.position = 'absolute';
+            dropdown.style.top = rect.bottom + 'px';
+            dropdown.style.left = rect.left + 'px';
+            document.body.appendChild(dropdown);
+        }
+
+        function applyFilter(columnIndex, filterValue) {
+            storedFilters[columnIndex] = filterValue;
+
+            for (let i = 1; i < table.rows.length; i++) {
+                let rowMatchesFilters = true;
+                for (const index in storedFilters) {
+                    const cellValue = table.rows[i].cells[index].textContent;
+                    if (storedFilters[index] !== 'all' && cellValue !== storedFilters[index]) {
+                        rowMatchesFilters = false;
+                        break;
+                    }
+                }
+                table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+            }
+
+            sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+        }
+    });
+</script>  -->
+
+<!-- ------------------------------------------------------------------------------------------------------------- -->
+
+<script>
+    // After 2 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>

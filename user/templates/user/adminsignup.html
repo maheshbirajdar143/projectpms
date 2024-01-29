@@ -1,0 +1,58 @@
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>PMS: Admin Register</title>
+		<link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/adminsignup.css' %}">
+
+		<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+		<script src="{% static 'js/jquery.min.js' %}"></script>
+		<script src="{% static 'js/popper.min.js' %}"></script>
+		<script src="{% static 'js/bootstrap.min.js' %}"></script>
+    </head>
+    <body>
+		{% include "user/navbar.html" %} <br><br>
+
+		<div class="signup-form" style="font-family: 'Roboto', sans-serif;">
+			<form  method="post" class="form-horizontal" style='color:rgb(241, 235, 227)'>
+				<center><h5  style='color:rgb(241, 235, 227)' >Admin Signup</h5></center>
+
+				{% csrf_token %}
+				{{ form1 | crispy }}
+				{{ form2 | crispy }}
+				<!-- {% for field in form %}
+					<div class="form-group">
+						<label class="control-label col-xs-4">{{ field.label_tag }}</label>
+						<div class="col-xs-8">{{ field }}</div>
+					</div>
+				{% endfor %} -->
+
+				<div class="form-group">
+					<div class="col-xs-8 col-xs-offset-4">
+						<button type="submit" style='border-radius: 30px; text-align: center; color:black' class="btn btn-outline-primary">Sign Up</button>
+					</div>
+				</div>
+				<div style='color:black;'>Already have an account? <a style='color:blue;' href="/adminlogin"><ins>Login here</ins></a></div>
+			</form>
+		</div>
+    </body>
+</html>
+
+
+
+<!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> -->
+<script>
+  $(document).ready(function () {
+    $("#id_username").on("input", function () {
+      var username = $(this).val();
+      var emailField = $("#id_email");
+      emailField.val(username + "@osvfx.in");
+    });
+  });
+</script>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title> PMS: Assigned Shot</title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/viewissuedshotbyartist.css' %}">        
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbarstudent.html" %}<br><br>
+        
+        <!-- <h3 class="p-3 mb-2 text-black" style = 'font-size: 18px;text-align:center;'>Shot assigned To You </h3> -->
+        <div style = 'margin-left:890px; margin-top: 10px; color:white'>
+            <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 200px; height:25px;">Shot Assigned </h5>
+        </div>
+
+
+            {% if li1%}
+                 <!-- The annotation image disply -->
+                 <div id="imageModal" class="modal">
+                    <span class="close" id="closeButton" title="Close">&times;</span>
+                    <img id="modalImage" src="" alt="Image" style="width: 100%; height: 100%;">
+                </div>
+
+                <table class="redTable" id="table">
+                    <thead>
+                        <tr>
+                            <th>Sr.No              </th>
+                            <th><span>Name         </span></th>
+                            <th><span>Project Name </span></th>
+                            <th><span>Shot Name    </span></th>
+                            <th><span>Shot Version </span></th>
+                            <th><span>Scope of Work</span> </th>
+                            <th><span>Issued Date  </span></th>
+                            <th><span>Shot ETA     </span></th>
+                            <th><span>Feedback     </span></th>
+                            <th><span>Shot Status  </span></th>
+                            <th> Feedback_img      </th>
+                            <th> Annotations       </th>
+                            <th> Status Update     </th>
+                        </tr>
+                    </thead>
+                
+                    <tbody>
+                        {% for t in li1 %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{t.0}}</td>
+                                <td>{{t.2}}</td>
+                                <td>{{t.3}}</td>
+                                <td>{{t.8}}</td>
+                                <td>{{t.9}}</td>
+                                <td>{{t.4| date:"d/m/Y"}}</td>
+                                <td>{{t.5 | date:"d/m/Y"}}</td>
+                                <td>{{t.6}}</td>
+                                <td>{{t.7}}</td>
+
+                                <td>
+                                    {% if t.11 %}
+                                        <img src="{{t.11.url}}" class="rounded-circle" alt="img" width="20" height="20" title="Double click to view">
+                                    {% else %}
+                                        No img
+                                    {% endif %}
+                                </td>
+                                
+                                <td>
+                                    {% if t.10 %}
+                                        <img src="{{t.10.url}}" class="rounded-circle" alt="img" width="20" height="20" title="Double click to view">
+                                    {% else %}
+                                        No img
+                                    {% endif %}
+                                </td>
+
+                                {% if t.7 == 'DONE' or t.7 == 'READY FOR REVIEW' %} 
+                                    <td style="color: green;">Sent</td>  
+                                {% elif t.7 == 'Kbk By Lead' or t.7 == 'Kbk-Supervisor' %}
+                                    <td>
+                                        <form action="{% url 'sendfeedback' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="artist" value="{{ t.0 }}">
+                                            <input type="hidden" name="project_name" value="{{ t.2 }}" readonly>
+                                            <input type="hidden" name="shot_name" value="{{ t.3 }}" readonly>
+                                            <input type="hidden" name="department" value="{{ t.1 }}">
+                                            <input type="hidden" name="shot_version" value="{{ t.8 }}" readonly>
+                                            <button type="submit" class="btn btn-outline-info btn-sm" style="width: 80px; border-radius: 25px;" 
+                                                onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">ReUpdate</button>
+                                        </form>
+                                    </td>  
+                                {% else %}
+                                    <td>
+                                        <form action="{% url 'sendfeedback' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="artist" value="{{ t.0 }}">
+                                            <input type="hidden" name="project_name" value="{{ t.2 }}" readonly>
+                                            <input type="hidden" name="shot_name" value="{{ t.3 }}" readonly>
+                                            <input type="hidden" name="department" value="{{ t.1 }}">
+                                            <input type="hidden" name="shot_version" value="{{ t.8 }}" readonly>
+                                            <button type="submit" class="btn btn-outline-info btn-sm" style="width: 70px;  border-radius: 25px;"
+                                                onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">Update</button>
+                                        </form>
+                                    </td>
+                                {% endif %} 
+                            </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            {%else%}
+                <!-- <div class="centered-text">
+                    <h6 style='color:rgb(244, 42, 237);'>No Shot Assigned to you !</h6>
+                </div> -->
+                <div class="centered-text">
+                    <h5>No Shot Assigned to you !</h5>
+                </div>
+            {%endif%}
+         
+    </body>
+</html>
+<!-- ----------------------------------------------------------------------------------------------------------------------------- -->
+                                    <!-- Open annotation image -->
+
+            <script>
+                var modal = document.getElementById("imageModal");
+                var closeBtn = document.getElementById("closeButton");
+            
+                function openModal(src) {
+                var modalImage = document.getElementById("modalImage");
+                modalImage.src = src;
+                modal.style.display = "block";
+                }
+            
+                closeBtn.onclick = function() {
+                modal.style.display = "none";
+                };
+            
+                var tableImages = document.querySelectorAll("table img");
+                tableImages.forEach(function(img) {
+                img.addEventListener("dblclick", function() {
+                    openModal(img.src);
+                });
+                });
+            </script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                            <!-- highlighted shot name  -->
+
+                <script>
+                    function highlightShot(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(3)').addClass('highlight');
+                    }
+
+                    function removeHighlight(button) {
+                    var row = $(button).closest('tr');
+                    $(row).find('td:eq(3)').removeClass('highlight');
+                    }
+                </script>
+ 
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                                    <!-- search column box -->        
+
+<!-- 
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const table = document.getElementById('table');
+                                            const headers = table.getElementsByTagName('th');
+                                            const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+                                    
+                                            // Update filter symbols and apply stored filters
+                                            for (let i = 1; i < headers.length - 1; i++) {
+                                                const filterSymbol = document.createElement('span');
+                                                filterSymbol.innerHTML = '<span style="font-size: smaller;">&#9660;</span>';
+                                                filterSymbol.style.cursor = 'pointer';
+                                                filterSymbol.onclick = function () {
+                                                    showFilterDropdown(i);
+                                                };
+                                                headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+                                                headers[i].appendChild(filterSymbol);
+                                    
+                                                // Check if a filter is applied to this header
+                                                if (storedFilters[i] && storedFilters[i] !== 'all') {
+                                                    applyFilter(i, storedFilters[i]);
+                                                    // Highlight the filter symbol for this header
+                                                    highlightFilterSymbol(i, '#ffcc00');  // Change color to your preference
+                                                }
+                                            }
+                                    
+                                            function showFilterDropdown(columnIndex) {
+                                                // Check if the dropdown is already open
+                                                const existingDropdown = document.getElementById('filterDropdown');
+                                                if (existingDropdown) {
+                                                    // Dropdown is open, close it
+                                                    document.body.removeChild(existingDropdown);
+                                                    return;
+                                                }
+                                    
+                                                const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+                                                const dropdown = document.createElement('select');
+                                                dropdown.id = 'filterDropdown'; // Set an ID to easily identify the dropdown
+                                                dropdown.innerHTML = '<option value="all" style="text-align:center">All</option>';
+                                    
+                                                // Modify to create a multiple selection dropdown
+                                                dropdown.multiple = true;
+                                    
+                                                values.forEach(value => {
+                                                    const option = document.createElement('option');
+                                                    option.value = value;
+                                                    option.text = value;
+                                                    dropdown.add(option);
+                                                });
+                                    
+                                                // Set selected values from stored filters
+                                                if (storedFilters[columnIndex] && storedFilters[columnIndex] !== 'all') {
+                                                    const selectedValues = storedFilters[columnIndex].split(',');
+                                                    Array.from(dropdown.options).forEach(option => {
+                                                        option.selected = selectedValues.includes(option.value);
+                                                    });
+                                                }
+                                    
+                                                dropdown.onchange = function () {
+                                                    const selectedOptions = Array.from(this.options).filter(option => option.selected);
+                                                    const selectedValues = selectedOptions.map(option => option.value).join(',');
+                                    
+                                                    applyFilter(columnIndex, selectedValues);
+                                    
+                                                    // Highlight the filter symbol for this header
+                                                    if (selectedValues === 'all') {
+                                                        highlightFilterSymbol(columnIndex, ''); // Remove highlight when 'All' is selected
+                                                    } else {
+                                                        highlightFilterSymbol(columnIndex, '#ffcc00'); // Change color to your preference
+                                                    }
+                                    
+                                                    document.body.removeChild(dropdown);
+                                                };
+                                    
+                                                const filterSymbol = headers[columnIndex].lastChild;
+                                                const rect = filterSymbol.getBoundingClientRect();
+                                                dropdown.style.position = 'absolute';
+                                                dropdown.style.top = rect.bottom + 'px';
+                                                dropdown.style.left = rect.left + 'px';
+                                                document.body.appendChild(dropdown);
+                                            }
+                                    
+                                    
+                                    
+                                            function applyFilter(columnIndex, filterValue) {
+                                                storedFilters[columnIndex] = filterValue;
+                                                for (let i = 1; i < table.rows.length; i++) {
+                                                    let rowMatchesFilters = true;
+                                                    for (const index in storedFilters) {
+                                                        const cellValue = table.rows[i].cells[index].textContent;
+                                                        const filterValues = storedFilters[index].split(',');
+                                                        if (storedFilters[index] !== 'all' && !filterValues.includes(cellValue)) {
+                                                            rowMatchesFilters = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                    table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+                                                }
+                                                sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+                                            }
+                                    
+                                            function highlightFilterSymbol(columnIndex, color) {
+                                                // Change the color of the filter symbol for the specified header
+                                                const filterSymbol = headers[columnIndex].lastChild;
+                                                filterSymbol.style.color = color;
+                                            }
+                                    
+                                            
+                                        });
+                                    </script> -->
+
+<!--                                   
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const table = document.getElementById('table');
+    const headers = table.getElementsByTagName('th');
+    const storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+
+    // Update filter symbols and apply stored filters
+    for (let i = 1; i < headers.length - 3; i++) {
+        const filterSymbol = document.createElement('span');
+        // filterSymbol.innerHTML = ' &#9660;';
+        filterSymbol.innerHTML = '<span style="font-size: smaller;">&#9660;</span>';
+        filterSymbol.style.cursor = 'pointer';
+        filterSymbol.onclick = function () {
+            showFilterDropdown(i);
+        };
+        headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+        headers[i].appendChild(filterSymbol);
+
+        // Check if a filter is applied to this header
+        if (storedFilters[i] && storedFilters[i] !== 'all') {
+            applyFilter(i, storedFilters[i]);
+            // Highlight the filter symbol for this header
+            highlightFilterSymbol(i, '#ffcc00');  // Change color to your preference
+        }
+    }
+
+    function showFilterDropdown(columnIndex) {
+        const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent)));
+        const dropdown = document.createElement('select');
+        dropdown.innerHTML = '<option value="all">All</option>';
+
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.text = value;
+            dropdown.add(option);
+        });
+
+        dropdown.value = storedFilters[columnIndex] || 'all';
+
+        dropdown.onchange = function () {
+            applyFilter(columnIndex, this.value);
+            // Highlight the filter symbol for this header
+            highlightFilterSymbol(columnIndex, '#ffcc00');  // Change color to your preference
+            document.body.removeChild(dropdown);             // dropdown auto remove after filter applied
+        };
+
+        const filterSymbol = headers[columnIndex].lastChild;
+        const rect = filterSymbol.getBoundingClientRect();
+        dropdown.style.position = 'absolute';
+        dropdown.style.top = rect.bottom + 'px';
+        dropdown.style.left = rect.left + 'px';
+        document.body.appendChild(dropdown);
+    }
+
+    function applyFilter(columnIndex, filterValue) {
+        storedFilters[columnIndex] = filterValue;
+
+        for (let i = 1; i < table.rows.length; i++) {
+            let rowMatchesFilters = true;
+            for (const index in storedFilters) {
+                const cellValue = table.rows[i].cells[index].textContent;
+                if (storedFilters[index] !== 'all' && cellValue !== storedFilters[index]) {
+                    rowMatchesFilters = false;
+                    break;
+                }
+            }
+            table.rows[i].style.display = rowMatchesFilters ? '' : 'none';
+        }
+
+        sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+    }
+
+    function highlightFilterSymbol(columnIndex, color) {
+        // Change the color of the filter symbol for the specified header
+        const filterSymbol = headers[columnIndex].lastChild;
+        filterSymbol.style.color = color;
+    }
+});
+
+</script> -->
+
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+<script>
+    // After 2 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>

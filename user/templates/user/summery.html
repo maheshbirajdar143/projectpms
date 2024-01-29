@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <title> PMS: Summery </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/summery.css' %}">
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbaradmin.html" %} <br><br>
+
+        <div class="p-2 mb-2 text-black" style="font-size: 18px;">
+            <div style = 'display: inline-block;'>
+                <a href="{% url 'allproject' %}"      style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production</a>
+                <a href="{% url 'allshot' %}"         style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Task</a>
+                <a href="{% url 'mandays' %}"         style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Mandays</a>
+                <a href="{% url 'viewissuedshot' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Artist</a>
+            </div>
+
+            <div style = 'display: inline-block; margin-left:500px; margin-top:5px; color:white'>
+                <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 110px; height:25px;">Summery</h5>
+            </div>
+        </div>
+
+
+        <h5> <b> All Shot Status Counts </b> </h5>
+
+            <div class="chart-container1">
+                <img src="data:image/png;base64,{{ chart_data1 }}" alt="Shot Status Chart" width="60%" height="60%">
+            </div>
+
+            <div class="chart-container2">
+                <img src="data:image/png;base64,{{ chart_data2 }}" alt="Shot Status Chart" width="60%" height="60%">
+            </div>
+
+        <table class="redTable" id="table">
+    
+            <tr style='text-align:center;'>
+                <th>Sr No</th>
+                <th>Status</th>
+                <th>Condition</th>
+                <th>Counts (Out of : {{ shot2_counts }})</th>
+            </tr>
+
+            <tr>
+                <td rowspan="5" >1</td>
+                <td rowspan="5">Internal Status</td>
+                <td style='text-align:left;'>YTS</td>
+                <td style='text-align:center;'>{{ yts_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>WIP</td>
+                <td>{{ wip_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>REVIEWED</td>
+                <td>{{ reviewed_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>HOLD</td>
+                <td>{{ hold_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>READY FOR REVIEW</td>
+                <td>{{ ready_for_review_count }}</td>
+            </tr>
+            
+
+
+            <tr>
+                <td rowspan="2">2</td>
+                <td rowspan="2">Assignment</td>
+                <td style='text-align:left;'>Not Assigned</td>
+                <td>{{ not_assigned_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>Assigned</td>
+                <td>{{ assigned_count }}</td>
+            </tr>
+            <tr>
+            </tr>
+        </table>
+
+        <br><br><br><br>
+
+<!-- -------------------------------------------------------------------    Issued Shot Status Count       --------------------------------------------------------------->
+
+        <!-- <h5> <b> Assigned Shot Status Counts </b> </h5>
+
+        <div class="chart-container3">
+            <img src="data:image/png;base64,{{ chart_data3 }}" alt="Shot Status Chart" width="60%" height="60%">
+        </div> 
+
+        <table class="redTable" id="table">
+
+            <tr style='text-align:center;'>
+                <th>Sr No</th>
+                <th>Status</th>
+                <th>Condition</th>
+                <th>Counts (Out of : {{ issuedshot_counts }})</th>
+            </tr>
+
+            <tr>
+                <td rowspan="5">1</td>
+                <td rowspan="5">Status</td>
+                <td style='text-align:left;'>WIP</td>
+                <td>{{ issued_wip_count }}</td>
+            </tr>
+
+            <tr>
+                <td style='text-align:left;'>Assigned</td>
+                <td>{{ issued_assigned_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>Re-assigned</td>
+                <td>{{ issued_reassigned_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>HOLD</td>
+                <td>{{ issued_hold_count }}</td>
+            </tr>
+            <tr>
+                <td style='text-align:left;'>READY FOR REVIEW</td>
+                <td>{{ issued_readyforreview_count }}</td>
+            </tr>
+        </table> -->
+    </body>
+</html>
+
+<!-- ----------------------------------------------------------------------------------------------- -->
+
+
+<script>
+    // After 2 seconds, refresh the page
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>

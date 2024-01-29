@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <title> PMS: All Project </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/allproject_artist.css' %}">
+    </head>
+
+    <body style="font-family: 'Roboto', sans-serif;">
+        {% include "user/navbarstudent.html" %}
+        <br>
+        <br><br>
+        <!-- <h3 class="p-3 mb-2 text-black" style = 'font-size: 20px;text-align:center;'>All Projects</h3> -->
+
+        <div style = 'margin-left:890px; color:white'>
+            <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 130px; height:25px;">All Projects </h5>
+        </div>
+
+        {% if projects %} 
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Project Name</th>
+                        <th>Number of Shots</th>
+                    </tr>
+                </thead>
+            
+                <tbody>
+                    {% for project in projects %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{% url 'pshots1' project.project_name %}" title="Click here">{{ project.project_name }}</a></td>
+                            <td>{{ project.num_shots }}</td>
+                        </tr>
+                    {% endfor %}
+                    
+                    <tr id="total-row">
+                        <td colspan="2"><strong>Total Shots:</strong></td>
+                        <td id="total-shots"></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <!-- <div class="centered-text">
+                <h6 style='color:rgb(244, 42, 237);'>Projects Not Available !</h6>
+            </div> -->
+            <div class="centered-text">
+                <h5>Projects Not Available !</h5>
+            </div>
+        {%endif%}
+    </body>
+</html><br>
+
+<!-- ------------------------------------------------------------------------------------------------------------------        -->
+                             <!-- Count total no. of shots -->
+
+<script>
+    var totalShots = 0;
+    var numShotsElements = document.querySelectorAll('#table tbody td:nth-child(3)');
+    for (var i = 0; i < numShotsElements.length; i++) {
+        totalShots += parseInt(numShotsElements[i].textContent);
+    }
+
+    var totalShotsElement = document.getElementById('total-shots');
+    totalShotsElement.textContent = totalShots.toString();
+</script>
+
+
+<!-- -------------------------------------------------------------------------------------------------------------------------- -->

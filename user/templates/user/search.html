@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/search.css' %}">
+    </head>
+
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %}
+    <br>
+    <br>
+    <br>
+
+        {% if shots %}
+        <table class="redTable" id="table">
+            <thead>
+                <tr>
+                    <th>Sr.No</th>
+                    <th>Project Name  </th> 
+                    <th>Shot Name     </th>
+                    <th>Scope of Work </th>
+                    <th>Date Posted   </th>
+                    <th>TGT Date      </th>
+                    <th>Dependency    </th> 
+                    <th>Assignment    </th>
+                    <th>Int. Status   </th>
+                    <th>Assign </th> 
+                </tr>
+            </thead>
+
+            <tbody>
+                       
+                {% for shot in shots %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ shot.project_name }}</td>
+                        <td>{{ shot.shot_name }}</td>
+                        <td class="description-cell">{{ shot.work_description }}</td>
+                        <td>{{ shot.date_started | date:"d/m/Y"  }}</td>
+                        <td>{{ shot.eta | date:"d/m/Y"  }}</td> 
+                        <td class="description-cell">{{ shot.dependency|safe }}</td>
+                    
+                        <td>
+                            {% if shot.work_status == 'Assigned' %}
+                                <span style="color: orange;">{{ shot.work_status }}</span>
+                            {% else %}
+                                <span style="color: red;">{{ shot.work_status }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="description-cell">
+                            {% if shot.internal_status == 'READY FOR REVIEW' %}
+                                <span style="color: green;"> {{shot.internal_status}}</span> 
+                                <a href="{% url 'reviewed_shot' shot.id %}">
+                                    <button type="button" class="btn btn-outline-success btn-sm"
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)"
+                                    onclick="return confirm('Are you sure, you want to reviewed this?');"> &#10004;</button>
+                                </a>
+                                    
+                                <a href="{% url 're_issueshot' %}?shot_name={{ shot.shot_name }}&project_name={{ shot.project_name }}">
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)" >&#10060;</button>
+                                </a>
+                            {% elif shot.internal_status == 'REVIEWED' %}
+                                <span style="color: #4dc3ff;;">{{shot.internal_status}} </span> 
+                            {% elif shot.internal_status == 'WIP' %}
+                                <span style="color: orange;">{{shot.internal_status}} </span> 
+                            {% elif shot.internal_status == 'HOLD' or shot.internal_status == 'OMMIT' %}
+                                <span style="color: #ff4de1;">{{ shot.internal_status }}</span>
+                            {% elif shot.internal_status == 'YTS' %}
+                                <span style="color: red;">{{shot.internal_status}} </span>   
+                            {% else %}    
+                                <span>{{shot.internal_status}} </span>                                                        
+                            {% endif %}
+                        </td>
+                        
+                        <td>                                                     
+                            <a href="{% url 'issueshot' %}?shot_name={{ shot.shot_name }}&project_name={{ shot.project_name }}"
+                                onclick="checkDependency('{{ shot.dependency }}');" class="'text-success"
+                             
+                                    onmouseover="highlightShot(this)" onmouseout="removeHighlight(this)">Assign
+                            </a>
+
+                            <!-- <a href="{% url 'editshot' shot.id %}">
+                                <button type="button" class="btn btn-outline-success btn-sm">
+                                    <i class="fa fa-pencil" style="color: green;"></i> 
+                                </button>
+                            </a> -->
+
+                            <!-- <a href="{% url 'deleteshot' shot.id %}">
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                onclick="return confirm('Are you sure, you want to delete this?');">
+                                    <i class="fa fa-trash" style="color: red;"></i> </button>
+                            </a>  -->
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% else %}
+            <h4> Shots Not Available </h4>
+        {% endif %}  
+  </body>
+</html>
+
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->           
+                        <!-- highlighted shot name  -->
+
+        <script>
+            function highlightShot(button) {
+            var row = $(button).closest('tr');
+            $(row).find('td:eq(2)').addClass('highlight');
+            }
+
+            function removeHighlight(button) {
+            var row = $(button).closest('tr');
+            $(row).find('td:eq(2)').removeClass('highlight');
+            }
+        </script>
+
+<!-- ------------------------------------------------------------------------------------------------------------------------- -->
+                <!-- new column movement -->
+
+                <script>
+                    $(document).ready(function() {
+                        let isMouseDown = false;
+                        let currentColumn;
+                        let originalColumnIndex;
+                
+                        $('th').on('mousedown', function() {
+                            isMouseDown = true;
+                            currentColumn = $(this).index();
+                            originalColumnIndex = currentColumn;
+                            $(this).addClass('active-column');
+                        });
+                
+                        $('th').on('mousemove', function() {
+                            if (isMouseDown && currentColumn !== $(this).index()) {
+                                let targetColumn = $(this).index();
+                                $('tr').each(function() {
+                                    let cells = $(this).children();
+                                    if (targetColumn > currentColumn) {
+                                        for (let i = currentColumn; i < targetColumn; i++) {
+                                            let cellToMove = cells.eq(i);
+                                            let nextCell = cells.eq(i + 1);
+                                            cellToMove.insertAfter(nextCell);
+                                        }
+                                    } else {
+                                        for (let i = currentColumn; i > targetColumn; i--) {
+                                            let cellToMove = cells.eq(i);
+                                            let prevCell = cells.eq(i - 1);
+                                            cellToMove.insertBefore(prevCell);
+                                        }
+                                    }
+                                });
+                                currentColumn = targetColumn;
+                            }
+                        });
+                
+                        $(document).on('mouseup', function() {
+                            if (isMouseDown) {
+                                isMouseDown = false;
+                                $('th').removeClass('active-column');
+                                $('#table').css('table-layout', 'fixed');
+                                setTimeout(function() {
+                                    $('#table').css('table-layout', 'auto');
+                                }, 0);
+                            }
+                        });
+                    });
+                </script>
+                                                    

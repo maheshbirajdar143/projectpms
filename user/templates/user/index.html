@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PMS</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbar.html" %}<br><br><br><br><br><br>
+
+    <div class="jumbotron">
+      <h4 style="color:rgb(241, 235, 227)"><ins><b>Project Management System</b></ins></h4>
+      <hr class="my-6">
+
+        <div class="row">
+            <div class="col-lg-6">
+              <a href="/adminclick"> <img src="{% static 'images/A1.png' %}" alt=""  title="Click here (Admin logo)"> </a> <br><br>
+              <!-- <a style='border-radius: 30px; text-align: center;' class="btn btn-outline-secondary mx-2" href="/adminclick" role="button" title="Click Here (TeamLead / Supervisor / Management)">ADMIN </a><br> -->
+            </div>
+
+            <div class="col-lg-6">
+              <a href="/studentclick"> <img src="{% static 'images/A2.png' %}" alt=""  title="Click here (Artist logo)"> </a> <br><br>
+              <!-- <a style='border-radius: 30px; text-align: center;' class="btn btn-outline-secondary mx-2" href="/studentclick" role="button" title="Click Here (All Artists)">ARTIST</a><br> -->
+            </div>
+        </div>
+        
+      <hr class="my-6">
+    </div>
+  </body>
+</html>
+
+

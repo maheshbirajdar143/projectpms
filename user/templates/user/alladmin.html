@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title> PMS: All Admin </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/alladmin.css' %}">
+  </head>
+  <body style="font-family: 'Roboto', sans-serif;">
+    {% include "user/navbaradmin.html" %}
+    <br>
+    <br>
+    <h5 class="p-3 mb-2 text-black" style = "font-size: 20px;text-align:center;">All Admin (TL / Supervisor / Management / IT)</h5>
+    
+        {% if admins %}
+            <table class="redTable" id="table">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th><span>Emp.ID      </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Name        </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Username    </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Email       </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Department  </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Designation </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for s in admins %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ s.aid }}</td>
+                            <td>{{ s.user.first_name }} {{ s.user.last_name }}</td>
+                            <td>{{ s.user.username }}</td>
+                            <td>{{ s.user.email }}</td>
+                            <td>{{ s.department }}</td>
+                            <td>{{ s.designation }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="centered-text">
+                <h5>Yet, No Admin Registered !</h5>
+            </div>
+        {% endif %}
+  </body>
+</html>
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+                                                    
+                                 <!-- column search box -->
+                                                    
+                                 
+            <script>
+            $(document).ready(function () {
+                $('.filter-input').on('input', function () {
+                    const columnIndex = $(this).closest('th').index(); 
+                    const searchTerm = $(this).val().toLowerCase().trim();
+                    const rows = $('#table tbody tr');
+        
+                    rows.each(function () {
+                        const cellValue = $(this).find('td').eq(columnIndex).text().toLowerCase();
+                        if (cellValue.includes(searchTerm)) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                });
+            });
+        </script>
+
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->

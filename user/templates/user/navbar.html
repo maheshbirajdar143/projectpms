@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">   
+        <title>PMS </title>
+        <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
+    </head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        <div>
+            <nav class="navbar navbar-expand-lg bgcolor fixed-top">
+                <img src="{% static 'images/OS_3d.jpeg' %}" class="rounded-circle mx-1" alt="PMS" width="45" height="45"  title="OS logo">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-start" id="navbarCollapse">
+                    <div class="navbar-nav">
+                        <a href="/"             class="nav-link" style="color:rgb(241, 235, 227)">Home</a>
+                        <a href="/adminclick"   class="nav-link" style="color:rgb(241, 235, 227)">Admin</a>
+                        <a href="/studentclick" class="nav-link" style="color:rgb(241, 235, 227)">Artist</a>
+                    </div>
+
+                    {% if messages %}
+                        <div id="messages-container" style="white-space: nowrap; margin-left: 40px;"> 
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}" style="color: rgb(61, 204, 244);" {% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </body>
+</html>
+
+<script>
+    setTimeout(function() {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.style.display = 'none';
+        }
+    }, 25000); 
+</script>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>PMS: Info </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/p1.png' %}">
+</head>
+    <body style="font-family: 'Roboto', sans-serif;">
+        <h3 class="p-3 mb-2 bg-info text-black" style = 'font-size: 20px;text-align:center;'>Shot Information</h3>
+        <!-- <div>
+            <h4> <ins><b>Lead Approve Info:</b></ins> </h4>
+                {% if review_info %}
+                    <ul>
+                        {% for review in review_info %}
+                            <li> <b>{{review.version}}</b> Approved by <b>{{ review.reviewed_by.first_name }} {{ review.reviewed_by.last_name }}</b> on {{ review.reviewed_date }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li>Not available</li>
+                    </ul>
+                {% endif %}
+
+
+            <h4> <ins><b>Sup Approve Info:</b></ins> </h4>
+                {% if approve_info %}
+                    <ul>
+                        {% for approve in approve_info %}
+                            <li> <b>{{approve.version}}</b> Approved by <b>{{ approve.approved_by.first_name }} {{ approve.approved_by.last_name }}</b> on {{ approve.approved_date }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li>Not available</li>
+                    </ul>
+                {% endif %}
+        </div> -->
+
+        <div>
+            <form method="get">
+                <label for="version_select">Select Version:</label>
+                <select name="version" id="version_select" onchange="this.form.submit()">
+                    {% for version in versions %}
+                        <option value="{{ version }}" {% if version == selected_version %}selected{% endif %}>{{ version }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <h4> <ins><b>Lead Approve Info:</b></ins> </h4>
+            {% if review_info %}
+                <ul>
+                    {% for review in review_info %}
+                        <li><b>{{review.version}}</b> Approved by <b>{{ review.reviewed_by.first_name }} {{ review.reviewed_by.last_name }}</b> on {{ review.reviewed_date }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <ul>
+                    <li>Not available</li>
+                </ul>
+            {% endif %}
+
+            <h4> <ins><b>Sup Approve Info:</b></ins> </h4>
+            {% if approve_info %}
+                <ul>
+                    {% for approve in approve_info %}
+                        <li><b>{{approve.version}}</b> Approved by <b>{{ approve.approved_by.first_name }} {{ approve.approved_by.last_name }}</b> on {{ approve.approved_date }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <ul>
+                    <li>Not available</li>
+                </ul>
+            {% endif %}
+        </div>
+    </body>
+</html>
