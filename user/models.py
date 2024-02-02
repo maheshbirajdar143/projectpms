@@ -68,14 +68,7 @@ CHOICES4= [
     ]
 
 
-CHOICES5= [
-    ('TEJAS', 'TEJAS'),
-    ('BNG', 'BNG'),
-    ('JAWAN', 'JAWAN'),
-    ('SOUP', 'SOUP'),
-    ('ADIPURUSH', 'ADIPURUSH'),
-    ('IC', 'IC'),
-    ]
+
 
 CHOICES6= [
     ('Not Assigned', 'Not Assigned'),
@@ -159,13 +152,14 @@ class Shot2(models.Model):
     client_status    = models.CharField(max_length=255,null=True, blank=True, verbose_name='Client Status', default='N/A')
     added_column     = models.JSONField(null=True, blank=True,default=dict)
     #shot_version     = models.IntegerField(null=True, blank=True, verbose_name='Version No.', default=1)
-    shot_version     = models.CharField(max_length=5, null=True, blank=True, verbose_name='Version No.', default='V0000')
+    shot_version     = models.CharField(max_length=5, null=True, blank=True, verbose_name='Version No.', default='V000')
     comp_status      = models.CharField(max_length=510,choices=CHOICES7, verbose_name='Comp Status', default='Pending')
     column_order     = models.TextField()
     issued_date      = models.DateTimeField(null=True, blank=True, verbose_name='Reviewed Date')
     issued_by        = models.CharField(max_length=255,null=True, blank=True, default='N/A')
     depnote          = models.CharField(max_length=255, null=True, blank=True, verbose_name='Department Note')                      # assigned all department
     recdepnote       = models.CharField(max_length=255, null=True, blank=True, verbose_name='Received Department Note')
+    department       = models.CharField(max_length=255, null=True, blank=True)
     
     def __str__(self):
         return self.project_name 
@@ -215,7 +209,8 @@ class Shot2(models.Model):
 class ShotDepNote(models.Model):
     shot        = models.ForeignKey(Shot2, on_delete=models.CASCADE, related_name='dep_notes')
     depnotes    = models.JSONField(null=True, blank=True, default=list, verbose_name='Department Notes')
-    recdepnotes = models.JSONField(null=True, blank=True, default=list, verbose_name='Received Department Notes')
+    recdepnotes = models.JSONField(null=True, blank=True, default=dict, verbose_name='Received Department Notes')
+    recdates    = models.DateField(null=True, blank=True, verbose_name='Date Received')
 
 #####################################################################################################################################################
 
@@ -263,7 +258,7 @@ class IssuedShot(models.Model):
     project_name     = models.CharField(max_length=255)
     shot_name        = models.CharField(max_length=255)
     #shot_version     = models.IntegerField(null=True, blank=True, verbose_name='Version No.')
-    shot_version     = models.CharField(max_length=255,  null=True, blank=True, verbose_name='Version No.', default='V0000')
+    shot_version     = models.CharField(max_length=255,  null=True, blank=True, verbose_name='Version No.', default='V000')
     work_description = models.CharField(max_length=2550, verbose_name='Scope of Work')
     department       = models.CharField(max_length=100)
 #    issuedate        =models.DateField(auto_now_add=True)

@@ -25,6 +25,7 @@
                         <th>Sr.No</th>
                         <th><span>Emp.ID      </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
                         <th><span>Name        </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
+                        <th><span>Usename       </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
                         <th><span>Email       </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
                         <th><span>Department  </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
                         <th><span>Designation </span> <div><input class="filter-input"  type="text" style="height: 20px; padding: 5px;"></div> </th>
@@ -39,6 +40,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ s.aid }}</td>
                             <td>{{ s.get_name }}</td>
+                            <td>{{ s.user.username }}</td>
                             <td>{{ s.user.email }}</td>
                             <td>{{ s.department }}</td>
                             <td>{{ s.designation }}</td>

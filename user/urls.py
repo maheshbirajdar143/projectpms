@@ -40,7 +40,8 @@ urlpatterns = [
 
 ########################   2) TASK    ############################################################
 
-    path('t1/', allshot_view, name='allshot'),      
+    path('t1/', allshot_view, name='allshot'),  
+    path('t1/<str:project_name>/', allshot_view, name='allshot_project'),
     path('t3/', searchshot_view, name= 'search'),
     path('t4/<int:shot_id>/', reviewed_shot, name='reviewed_shot'),
     path('t5/', re_issueshot_view, name='re_issueshot'),

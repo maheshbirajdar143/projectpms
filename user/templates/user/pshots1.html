@@ -86,31 +86,33 @@
                 </table>
         {% else %}
             <h6> Shots Not Available </h6>
-        {%endif%}
- 
-  </body>
-</html>
+        {%endif%} <br>
 
 
-<div class="pagination" style="float: right;">
-    <span class="step-links">
-        {% if shots.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <!-- <a href="?page={{ shots.previous_page_number }}">previous</a> -->
-        {% endif %}
-
-        {% for i in shots.paginator.page_range %}
-            <span class="{% if i == shots.number %}current{% endif %}">
-                <a href="?page={{ i }}">{{ i }}</a>
+        <div class="pagination">
+            <span class="step-links">
+                {% if shots.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <!-- <a href="?page={{ shots.previous_page_number }}">previous</a> -->
+                {% endif %}
+        
+                {% for i in shots.paginator.page_range %}
+                    <span class="{% if i == shots.number %}current{% endif %}">
+                        <a href="?page={{ i }}">{{ i }}</a>
+                    </span>
+                {% endfor %}
+        
+                {% if shots.has_next %}
+                    <!-- <a href="?page={{ shots.next_page_number }}">next</a> -->
+                    <a href="?page={{ shots.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
             </span>
-        {% endfor %}
+        </div>
+        
+        
+  </body>
+</html><br>
 
-        {% if shots.has_next %}
-            <!-- <a href="?page={{ shots.next_page_number }}">next</a> -->
-            <a href="?page={{ shots.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </span>
-</div>
 <!-- ------------------------------------------------------------------------------------------------------------------------------- -->
                 <!-- column search box -->
 

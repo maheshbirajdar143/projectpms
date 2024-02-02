@@ -92,12 +92,13 @@ def studentsignup_view(request):                                                
 
             my_student_group = Group.objects.get_or_create(name='ARTIST')
             my_student_group[0].user_set.add(user)
-
+            messages.success(request,f'Your account has created successfully')
             return HttpResponseRedirect('studentlogin')
-        
         else:
-            context['form1'] = form1  
-            context['form2'] = form2
+            messages.error(request,f'Something went wrong') 
+    else:
+        context['form1'] = form1  
+        context['form2'] = form2
     return render(request,'user/studentsignup.html',context)
  
 ############################################################################################################################################
@@ -269,8 +270,8 @@ def search_shot2_artist(request):                                               
 def allartist_view(request):                                                                                                          # All Artist
     user = request.user
     is_admin_group = is_admin(user)
-
-    artists = StudentExtra.objects.all().order_by('user__first_name', 'user__last_name')
+    # artists = StudentExtra.objects.all().order_by('user__first_name', 'user__last_name')
+    artists = StudentExtra.objects.all().order_by('department')
     context = {'artists':artists, 'is_admin_group':is_admin_group}
     return render(request,'user/allartist.html', context)
 
@@ -282,7 +283,8 @@ def alladmin_view(request):                                                     
     # user_data = admin_group.user_set.all()
     # admins = [{'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email, 'username': user.username } for user in user_data]
     # context = {'admins':admins}
-    admins = AdminExtra.objects.all().order_by('user__first_name', 'user__last_name')
+    # admins = AdminExtra.objects.all().order_by('user__first_name', 'user__last_name')
+    admins = AdminExtra.objects.all().order_by('department')
     context = {'admins':admins}
     return render(request,'user/alladmin.html', context)
 
@@ -741,23 +743,17 @@ def import_excel(request):
 
 
 @login_required(login_url='adminlogin')                                                                                 # All Projects Shot
-def allshot_view(request):
-    shots = Shot2.objects.all().order_by('project_name')
-    items_per_page = 30
-    paginator = Paginator(shots, items_per_page)
-    page = request.GET.get('page')
+def allshot_view(request, project_name=None):
+    projects = Shot2.objects.values('project_name').annotate(num_shots=Count('project_name'))
+    user_department = AdminExtra.objects.get(user=request.user)
 
-    try:
-        shots = paginator.page(page)
-    except PageNotAnInteger:
-        shots = paginator.page(1)
-    except EmptyPage:
-        shots = paginator.page(paginator.num_pages)
-
-    context = {'shots': shots}
-    return render(request, 'user/allshot.html', context)
-
-
+    if project_name:
+        shots = Shot2.objects.filter(project_name=project_name).order_by('internal_status')
+        context = {'shots': shots, 'projects': projects, 'project_name': project_name, 'user_department': user_department}
+        return render(request, 'user/allshot.html', context)
+    else:
+        context = {'projects': projects, 'user_department': user_department}
+        return render(request, 'user/allshot.html', context)
 
 
 
@@ -765,12 +761,13 @@ def allshot_view(request):
 def shot_department_view(request, id):
     shot = Shot2.objects.get(id=id)
     dep_notes = ShotDepNote.objects.filter(shot=shot)
-    rec_notes = ShotDepNote.objects.filter(shot=shot)
+    rec_notes = ShotDepNote.objects.filter(shot=shot).first()
+    recdepnotes = rec_notes.recdepnotes if dep_notes else {}
 
     context = {
         'shot': shot,
         'dep_notes': dep_notes,
-        'rec_notes' : rec_notes,}
+        'recdepnotes' : recdepnotes,}
     return render(request, 'user/shotdep.html', context)
 
 ################################################################################################################################################
@@ -780,6 +777,7 @@ def reviewed_shot(request, shot_id):
     try:
         shot = Shot2.objects.get(pk=shot_id)
         name = request.user.username
+        today = date.today()
 
         if not name:
             return HttpResponseBadRequest('Name is required.')
@@ -787,13 +785,37 @@ def reviewed_shot(request, shot_id):
         if name != request.user.username:
             raise HttpResponseBadRequest('Enter the correct username.')
 
-        #shot.internal_status = f'REVIEWED (by {request.user.username})'
-        #shot.internal_status = f'REVIEWED'
         shot.internal_status = f'Approved By Lead'
         version = shot.shot_version
         review = Review(shot=shot, reviewed_by=request.user, version=version)
         review.save()
         shot.save()
+
+        admin = AdminExtra.objects.filter(user=request.user)
+        for each in admin:
+            user_department = each.department
+        
+
+        depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
+        recdepnotes = depnote_instance.recdepnotes or {}
+
+        if user_department not in recdepnotes:
+            recdepnotes[user_department] = []
+
+        entry = f"{shot.internal_status} - {today.strftime('%Y-%m-%d')}"
+        if entry not in recdepnotes[user_department]:
+            recdepnotes[user_department].append(entry) 
+
+        # if shot.internal_status not in recdepnotes[user_department]:
+        #     recdepnotes[user_department].append(shot.internal_status) 
+            # recdepnotes[user_department].append({
+            #         'status': shot.internal_status,
+            #         'date': today.strftime("%Y-%m-%d") 
+            #     }) 
+
+        depnote_instance.recdepnotes = recdepnotes
+        depnote_instance.save()
+
         messages.success(request, f'Shot (Version-{version}) Approved by {request.user.first_name} {request.user.last_name}.')
 
     except Shot2.DoesNotExist:
@@ -1125,9 +1147,6 @@ def re_issueshot_sup_view(request):
 @user_passes_test(is_admin)
 def viewissuedshot_view(request):
     issuedshots = IssuedShot.objects.all().order_by("shot_name")
-    paginator = Paginator(issuedshots, 30)
-    page = request.GET.get('page')
-    issuedshots = paginator.get_page(page)
 
     def is_all_done(shot_name):
         return IssuedShot.objects.filter(shot_name=shot_name).exclude(work_status='READY FOR REVIEW').count() == 0
@@ -1139,59 +1158,114 @@ def viewissuedshot_view(request):
         if not hasattr(issuedshot, 'work_status') or issuedshot.work_status is None:
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(work_status='YTS')
 
+
         elif is_all_done(issuedshot.shot_name):
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight1">{department_to_highlight}</span>')
             shot.save()
-            
+
+
         elif issuedshot.work_status == 'WIP':
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='WIP')
+            department_to_highlight = issuedshot.department
+            shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
+
+            depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
+            recdepnotes = depnote_instance.recdepnotes or {}
+
+            if department_to_highlight not in recdepnotes:
+                recdepnotes[department_to_highlight] = []
+
+            entry = f"{issuedshot.work_status} - {today.strftime('%Y-%m-%d')}"
+            if entry not in recdepnotes[department_to_highlight]:
+                recdepnotes[department_to_highlight].append(entry) 
+
+            depnote_instance.recdepnotes = recdepnotes
+            depnote_instance.save()
+
+
 
         elif issuedshot.work_status == 'HOLD':
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='HOLD')
+            department_to_highlight = issuedshot.department
+            shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
+
+            depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
+            recdepnotes = depnote_instance.recdepnotes or {}
+
+            if department_to_highlight not in recdepnotes:
+                recdepnotes[department_to_highlight] = []
+
+            entry = f"{issuedshot.work_status} - {today.strftime('%Y-%m-%d')}"
+            if entry not in recdepnotes[department_to_highlight]:
+                recdepnotes[department_to_highlight].append(entry)
+
+            # if issuedshot.work_status not in recdepnotes[department_to_highlight]:
+            #     recdepnotes[department_to_highlight].append(issuedshot.work_status)
+                # recdepnotes[department_to_highlight].append({
+                #     'status': issuedshot.work_status,
+                #     'date': today.strftime("%Y-%m-%d")  
+                # }) 
+
+            depnote_instance.recdepnotes = recdepnotes
+            depnote_instance.save()
+            issuedshot.save()
+
+
 
         elif issuedshot.work_status == 'DONE':
             issuedshot.work_status = 'READY FOR REVIEW'
+            Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='READY FOR REVIEW')
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight1">{department_to_highlight}</span>')
-            #shot.save()
+            
+            shot.department = department_to_highlight
+            shot.save()
+
             depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
-            recdepnotes = depnote_instance.recdepnotes or []
+            recdepnotes = depnote_instance.recdepnotes or {}
+
             if department_to_highlight not in recdepnotes:
-                recdepnotes.append(department_to_highlight)
-                depnote_instance.recdepnotes = recdepnotes
-                depnote_instance.save()
+                recdepnotes[department_to_highlight] = []
+
+            entry = f"{issuedshot.work_status} - {today.strftime('%Y-%m-%d')}"
+            if entry not in recdepnotes[department_to_highlight]:
+                recdepnotes[department_to_highlight].append(entry)
+
+            depnote_instance.recdepnotes = recdepnotes
+            depnote_instance.save()
             issuedshot.save()
-            Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='READY FOR REVIEW')
+            
+
+
 
         elif issuedshot.work_status == 'READY FOR REVIEW':
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight1">{department_to_highlight}</span>')
             shot.save()
     
+
+
         elif issuedshot.work_status == 'Kbk By Lead':
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='Kbk By Lead')
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight">{department_to_highlight}</span>')
             shot.save()
+
+
 
         elif issuedshot.work_status == 'Kbk-Supervisor':
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(internal_status='Kbk-Supervisor')
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight">{department_to_highlight}</span>')
             shot.save()
   
+
+
         else:
             Shot2.objects.filter(shot_name=issuedshot.shot_name).update(work_status='Assigned')
             department_to_highlight = issuedshot.department
             shot = Shot2.objects.get(shot_name=issuedshot.shot_name)
-            # shot.dependency = shot.dependency.replace(department_to_highlight, f'<span class="highlight">{department_to_highlight}</span>')
-            #shot.save()
             depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
             depnotes = depnote_instance.depnotes or []
             if department_to_highlight not in depnotes:
@@ -1306,13 +1380,34 @@ def searchshot_mang_view(request):                                              
 @login_required(login_url='adminlogin')                                                                                 # Final Management Approved Shot
 def final_approved_shot(request, shot_id):
     shot = Shot2.objects.get(pk=shot_id)
-    #shot.internal_status = f'APPROVED (by {request.user.username})'
-    #shot.internal_status = f'APPROVED'
     shot.internal_status = f'Approved By Sup'
     version = shot.shot_version
     approve = Approve(shot=shot, approved_by=request.user, version=version)
     approve.save()
     shot.save()
+
+    admin = AdminExtra.objects.filter(user=request.user)
+    for each in admin:
+        user_department = each.department
+
+    today = date.today()
+        
+    depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
+    recdepnotes = depnote_instance.recdepnotes or {}
+
+    if user_department not in recdepnotes:
+        recdepnotes[user_department] = []
+
+    entry = f"{shot.internal_status} - {today.strftime('%Y-%m-%d')}"
+    if entry not in recdepnotes[user_department]:
+        recdepnotes[user_department].append(entry)
+
+    # if shot.internal_status not in recdepnotes[user_department]:
+    #     recdepnotes[user_department].append(shot.internal_status) 
+
+    depnote_instance.recdepnotes = recdepnotes
+    depnote_instance.save()
+    
     messages.success(request, f'Shot (Version-{version}) Approved by {request.user.first_name} {request.user.last_name}.')
     return redirect('mang_message1')
 
