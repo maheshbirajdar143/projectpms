@@ -252,3 +252,57 @@ iframe {
     border-radius: 40px; 
     padding: 4px 8px; 
 }
+
+
+
+.redTable1 {
+  margin: left; /* Align the table in the center */
+  width: 10%; /* Adjust the width as needed */
+  border-collapse: collapse;
+  overflow-y: auto;
+}
+
+.redTable1 th, .redTable1 td {
+  border: 1px solid black;
+  padding: 6px;
+  text-align: center;
+  font-size: 15px;
+}
+
+
+table.redTable1 td, table.redTable1 th {
+  border: 1px solid #AAAAAA;
+  padding: 0px 0px;
+  }
+  
+  table.redTable1 tbody td {
+  font-size: 13px;
+  }
+  
+  /* table.redTable tr:nth-child(even) {
+  background: #F5C8BF;
+  } */
+  
+  table.redTable1 thead {
+  background: #504a4a;
+  }
+  
+  table.redTable1 thead th {
+  font-size: 13px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-align: center;
+  border-left: 1px solid #b8b0b0;
+  }
+  
+  table.redTable1 thead th:first-child {
+  border-left: none;
+  }
+
+.sidebar {
+  position: fixed;
+  height: 100%;
+  width: 200px;
+  background-color: #f1f1f1;
+  padding-top: 20px;
+}
