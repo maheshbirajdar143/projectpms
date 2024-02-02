@@ -104,29 +104,3 @@
     2) redis-cli -h 0.0.0.0 -p 6379
 '''
 ####################################################################################
-
-
-'''
-##  Using Nginx & gunicorn django project run (198.168.13.26)
-
-sudo yum install epel-release
-sudo yum install nginx
-sudo systemctl start nginx
-sudo systemctl status nginx
-sudo systemctl stop nginx
-sudo systemctl enable nginx
-
-
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --reload
-sudo firewall-cmd --permanent --add-port=8000/tcp
-sudo firewall-cmd --zone=public --add-port=8000/tcp --permanent
-
-sudo yum install epel-release
-sudo yum install ufw
-sudo ufw allow 8000
-
-gunicorn --bind 0.0.0.0:8000 openslate.wsgi
-
-'''
