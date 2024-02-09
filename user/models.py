@@ -20,8 +20,7 @@ CHOICES1= [
     ('DMP','DMP'),
     ('Pipeline','Pipeline'),
     ('IT','IT'),
-    ('HR','HR'),
-    ('Account','Account'),
+    ('Management','Management'),
     ]
 
 CHOICES1 = sorted(CHOICES1, key=lambda choice: choice[1])
@@ -160,6 +159,7 @@ class Shot2(models.Model):
     depnote          = models.CharField(max_length=255, null=True, blank=True, verbose_name='Department Note')                      # assigned all department
     recdepnote       = models.CharField(max_length=255, null=True, blank=True, verbose_name='Received Department Note')
     department       = models.CharField(max_length=255, null=True, blank=True)
+    dep1             = models.CharField(max_length=255, null=True, blank=True)
     
     def __str__(self):
         return self.project_name 
@@ -185,6 +185,10 @@ class Shot2(models.Model):
     
     def get_approves(self):
         return Approve.objects.filter(shot=self).order_by('-approved_date')
+    
+    @property
+    def sorted_dependencies(self):
+        return sorted(self.dependency.split(','))
     
 
     # def save(self, *args, **kwargs):

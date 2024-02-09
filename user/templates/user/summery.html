@@ -11,7 +11,13 @@
 
         <div class="p-2 mb-2 text-black" style="font-size: 18px;">
             <div style = 'display: inline-block;'>
-                <a href="{% url 'allproject' %}"      style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production</a>
+                
+                {% if user_department.department == 'Production' or user_department.department == 'Pipeline' or user_department.department == 'Management' %}
+                    <a href="{% url 'allproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                {%else%}
+                    <a href="#" title="Only For Production & Management"    style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                {%endif%}
+
                 <a href="{% url 'allshot' %}"         style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Task</a>
                 <a href="{% url 'mandays' %}"         style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Mandays</a>
                 <a href="{% url 'viewissuedshot' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Artist</a>

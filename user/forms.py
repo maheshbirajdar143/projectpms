@@ -10,13 +10,15 @@ from django.shortcuts import render
 CHOICES1= [
     ('Roto', 'Roto'),
     ('Paint', 'Paint'),
+    ('CG', 'CG'),
     ('Comp','Comp'),
-    ('CG','CG'),
     ('Production','Production'),
     ('Editor','Editor'),
+    ('Matchmove','Matchmove'),
     ('MGFX','MGFX'),
     ('DMP','DMP'),
-    ('Pipeline','Pipeline'),
+    ('FX','FX'),
+    ('Management','Management'),
     ]
 
 CHOICES1 = sorted(CHOICES1, key=lambda choice: choice[1])

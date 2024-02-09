@@ -18,7 +18,13 @@
         <div class="options" style="text-align:center">
           <!-- <p><b>As you are <ins>Admin</ins>, Options Available For You !</b></p> -->
           <div class="button-container">
-            <a href="{% url 'allproject' %}"     style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Production</a>
+            
+            {% if user_department.department == 'Production' or user_department.department == 'Pipeline' or user_department.department == 'Management' %}
+              <a href="{% url 'allproject' %}"     style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Production</a>
+            {% else %}
+              <a href="#" style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true" title="Only For Production & Management">Production</a>
+            {%endif%}
+
             <a href="{% url 'allshot' %}"        style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Task</a>
             <a href="{% url 'mandays' %}"        style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Mandays</a><br><br>
             <a href="{% url 'viewissuedshot' %}" style='border-radius: 25px; text-align: center;' class="btn btn-outline-primary btn-lg custom-button" role="button" aria-pressed="true">Artist</a>

@@ -42,10 +42,16 @@
                     {% for project in projects %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td><a href="{% url 'pshots' project.project_name %}" title="Click here" >{{ project.project_name }}</a></td>
+                            <!-- <td><a href="{% url 'pshots' project.project_name %}" title="Click here">{{ project.project_name }}</a></td> -->
+                            <td>
+                                <a href="{% url 'pshots' project.project_name %}" title="{{ project.project_name }}">
+                                    {{ project.project_name|slice:":15" }}{% if project.project_name|length > 15 %}...{% endif %}
+                                </a>
+                            </td>
+                            
                             <td>{{ project.num_shots }}</td>
                             <td>
-                                {% if user.is_authenticated and user.username == "maheshb" %}
+                                {% if user_department.department == 'Management' or user_department.department == 'Pipeline' %}
                                     <a href="{% url 'delete_project' project.project_name %}" 
                                         onclick="return confirm('Are you sure, you want to delete this project and corresponding all shots?')"
                                         class="text-danger"  title="Click here to remove project ({{project.project_name}})">x
@@ -53,7 +59,7 @@
                                 {% else %}
                                     <a href="#" 
                                         onclick="return confirm('You do not have access to delete this project !')"
-                                        class="text-warning" title="Click here to remove project ({{project.project_name}})">x
+                                        class="text-warning" title="You do not have access to delete this project ({{project.project_name}})">x
                                     </a>
                                 {% endif %}
                             </td>

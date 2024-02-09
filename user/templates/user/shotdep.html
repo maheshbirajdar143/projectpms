@@ -9,7 +9,6 @@
 
     <h4>Assigned Department </h4>
         {% if dep_notes %}
-        
             <ul>
                 {% for dep_note in dep_notes %}
                     <li>{{ dep_note.depnotes }}</li>
@@ -22,14 +21,18 @@
     <!-- ------------------------------------------------------------------- -->
 
     <h4>Work Status Department </h4>
-    {% for department, notes in recdepnotes.items %}
-        <h4>{{ department }}</h4>
-        <ul>
-            {% for note in notes %}
-                <li>{{ note }}</li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
+    {% if recdepnotes %}
+        {% for department, notes in recdepnotes.items %}
+            <h4>{{ department }}</h4>
+            <ul>
+                {% for note in notes %}
+                    <li>{{ note }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    {% else %}
+        <ul><li>Status not updated yet</li></ul>
+    {% endif %}
 
 
 

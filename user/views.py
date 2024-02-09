@@ -110,7 +110,9 @@ def is_admin(user):                                                             
 
 def afterlogin_view(request):                                                                                     # After login
     if is_admin(request.user):
-        return render(request,'user/adminafterlogin.html')
+        user_department = AdminExtra.objects.get(user=request.user)
+        context = {'user_department':user_department}
+        return render(request,'user/adminafterlogin.html', context)
     else:
         return render(request,'user/studentafterlogin.html')
 
@@ -367,14 +369,17 @@ def delete_project(request, project_name):
 
 @login_required(login_url='adminlogin')                                                                              # All Project List
 def allproject_view(request):
+    user_department = AdminExtra.objects.get(user=request.user)
     projects = Shot2.objects.values('project_name').annotate(num_shots=Count('project_name'))
-    context = {'projects': projects}
+    context = {'projects': projects, 'user_department':user_department}
     return render(request, 'user/allproject.html', context)
 
 ####################################################################################################################################################
 
 @login_required(login_url='adminlogin')                                                                               # All shot by selected project
 def project_shots_view(request, project_name): 
+    user_department = AdminExtra.objects.get(user=request.user)
+
     if request.method == 'POST':   
         for shot in Shot2.objects.filter(project_name=project_name):
             if shot.added_column:
@@ -440,7 +445,7 @@ def project_shots_view(request, project_name):
             messages.success(request, f'Column ({remove_column_name}) removed successfully!')
             return redirect('pshots', project_name=project_name)
         
-    shots = Shot2.objects.filter(project_name=project_name).order_by('shot_name')
+    shots = Shot2.objects.filter(project_name=project_name).order_by('internal_status')
     project_added_date = shots.first().date_started
     project_TGT_Date = shots.first().eta
 
@@ -471,7 +476,8 @@ def project_shots_view(request, project_name):
     context = {'project_name': project_name, 
                'shots': shots, 
                'project_added_date': project_added_date,
-               'project_TGT_Date': project_TGT_Date}
+               'project_TGT_Date': project_TGT_Date,
+               'user_department':user_department,}
     return render(request, 'user/pshots.html', context)
 
 
@@ -749,12 +755,21 @@ def allshot_view(request, project_name=None):
 
     if project_name:
         shots = Shot2.objects.filter(project_name=project_name).order_by('internal_status')
-        context = {'shots': shots, 'projects': projects, 'project_name': project_name, 'user_department': user_department}
+        displayed_shots = []  # List to store shots that meet the display conditions
+        for shot in shots:
+            if (user_department.department in shot.dependency or 
+                user_department.department == "Production" or 
+                user_department.department == "Pipeline" or 
+                user_department.department == "Management"):
+                displayed_shots.append(shot)
+
+        context = {'shots': displayed_shots, 'projects': projects, 'project_name': project_name, 'user_department': user_department}
         return render(request, 'user/allshot.html', context)
     else:
         context = {'projects': projects, 'user_department': user_department}
         return render(request, 'user/allshot.html', context)
 
+    
 
 
 @login_required(login_url='adminlogin')                                                                              # View assigned department & status received 
@@ -775,6 +790,10 @@ def shot_department_view(request, id):
 @login_required(login_url='adminlogin')
 def reviewed_shot(request, shot_id):
     try:
+        admin = AdminExtra.objects.filter(user=request.user)
+        for each in admin:
+            user_department = each.department
+
         shot = Shot2.objects.get(pk=shot_id)
         name = request.user.username
         today = date.today()
@@ -786,15 +805,12 @@ def reviewed_shot(request, shot_id):
             raise HttpResponseBadRequest('Enter the correct username.')
 
         shot.internal_status = f'Approved By Lead'
+        shot.dep1 = user_department
         version = shot.shot_version
         review = Review(shot=shot, reviewed_by=request.user, version=version)
         review.save()
         shot.save()
 
-        admin = AdminExtra.objects.filter(user=request.user)
-        for each in admin:
-            user_department = each.department
-        
 
         depnote_instance, created = ShotDepNote.objects.get_or_create(shot=shot)
         recdepnotes = depnote_instance.recdepnotes or {}
@@ -1146,7 +1162,12 @@ def re_issueshot_sup_view(request):
 @login_required(login_url='adminlogin')                                                                                         # View Issued Shot
 @user_passes_test(is_admin)
 def viewissuedshot_view(request):
-    issuedshots = IssuedShot.objects.all().order_by("shot_name")
+    user_department = AdminExtra.objects.get(user=request.user)
+
+    if user_department.department == 'Production' or user_department.department == 'Pipeline' or user_department.department == 'Management':
+        issuedshots = IssuedShot.objects.all().order_by("shot_name")
+    else:
+        issuedshots = IssuedShot.objects.filter(department=user_department.department).order_by("shot_name")
 
     def is_all_done(shot_name):
         return IssuedShot.objects.filter(shot_name=shot_name).exclude(work_status='READY FOR REVIEW').count() == 0
@@ -1335,7 +1356,7 @@ def viewissuedshot_view(request):
              issuedshot.kbk_image,
              )
         li.append(t)
-    context = {'li': li, 'issuedshots':issuedshots}
+    context = {'li': li, 'issuedshots':issuedshots, 'user_department':user_department}
     return render(request, 'user/viewissuedshot.html', context)
 
 ############################################################################################################################################
@@ -1355,11 +1376,18 @@ def deleteissuedshot_view(request, pk):
 
 @login_required(login_url='adminlogin')                                                                                  # All Shot for management
 def allshot_view1(request):
+    user_department = AdminExtra.objects.get(user=request.user) 
     shots = Shot2.objects.filter(work_status='Assigned').order_by('shot_name')
-    paginator = Paginator(shots, 25)
-    page = request.GET.get('page')
-    shots = paginator.get_page(page) 
-    context = {'shots': shots}
+
+    displayed_shots = [] 
+    for shot in shots:
+        if (user_department.department in shot.dependency or 
+            user_department.department == "Production" or 
+            user_department.department == "Pipeline" or 
+            user_department.department == "Management"):
+            displayed_shots.append(shot)
+
+    context = {'shots': displayed_shots, 'user_department':user_department}
     return render(request, 'user/mang_message1.html', context)
 
 ####################################################################################################################################################
@@ -1425,23 +1453,14 @@ def allproject_view_artist(request):
 ###############################################################################################################################################
 
 @login_required(login_url='studentlogin')                                                                        # All shot by selected project - artist
-def project_shots_view1(request, project_name): 
-    shots = Shot2.objects.filter(project_name=project_name).order_by('shot_name')
+def project_shots_view1(request, project_name):
+    user_department1 = StudentExtra.objects.get(user=request.user)
+
+    shots = Shot2.objects.filter(project_name=project_name, dependency__icontains=user_department1.department).order_by('shot_name')
     project_added_date = shots.first().date_started
     project_TGT_Date = shots.first().eta
-    
-    items_per_page = 30
-    paginator = Paginator(shots, items_per_page)
-    page = request.GET.get('page')
-
-    try:
-        shots = paginator.page(page)
-    except PageNotAnInteger:
-        shots = paginator.page(1)
-    except EmptyPage:
-        shots = paginator.page(paginator.num_pages)
         
-    context = {'project_name': project_name, 'shots': shots, 'project_added_date': project_added_date, 'project_TGT_Date': project_TGT_Date}
+    context = {'project_name': project_name, 'shots': shots, 'project_added_date': project_added_date, 'project_TGT_Date': project_TGT_Date, 'user_department1': user_department1}
     return render(request, 'user/pshots1.html', context)
 
 ###############################################################################################################################################
@@ -1462,7 +1481,7 @@ def project_shots_view1(request, project_name):
 def get_review_approval_info(request, shot_id):
     shot = Shot2.objects.get(pk=shot_id)
     review_info = shot.get_reviews().order_by('version')
-    approve_info = shot.get_approves()
+    approve_info = shot.get_approves().order_by('version')
     history_entries = ShotStatusHistory.objects.filter(shot=shot).order_by('change_date')
 
     versions = list(set(review_info.values_list('version', flat=True)) | set(approve_info.values_list('version', flat=True)))
@@ -1615,6 +1634,7 @@ def artist_portal(request):
 
 @login_required(login_url='adminlogin') 
 def issued_shots_with_departments(request):
+    user_department = AdminExtra.objects.get(user=request.user)
     issued_shots = IssuedShot.objects.values('shot_name', 'department').annotate(total_manday=Sum('manday'), total_overdue=Sum('overdue')).order_by('shot_name')
     shot_departments = {}
 
@@ -1631,7 +1651,7 @@ def issued_shots_with_departments(request):
         shot_departments[shot_name]['total_manday'] += manday
         shot_departments[shot_name]['total_overdue'] += overdue
 
-    context = {'shot_departments': shot_departments, 'issued_shots':issued_shots}
+    context = {'shot_departments': shot_departments, 'issued_shots':issued_shots, 'user_department':user_department}
     return render(request, 'user/mandays.html', context)
 
 #############################################################################################################################################
@@ -1674,6 +1694,7 @@ def generate_pie_chart(labels, counts, title, status_colors):
 
 @login_required(login_url='adminlogin') 
 def summery_allshots(request):
+    user_department = AdminExtra.objects.get(user=request.user)
     shot2_counts                 = Shot2.objects.count()
     issuedshot_counts            = IssuedShot.objects.values('shot_name').annotate(count=Count('shot_name')).count()
 
@@ -1721,7 +1742,8 @@ def summery_allshots(request):
         'issued_wip_count': issued_wip_count,
         'chart_data1': chart_data1,
         'chart_data2': chart_data2,
-        'chart_data3': chart_data3 }
+        'chart_data3': chart_data3,
+        'user_department':user_department, }
 
     return render(request, 'user/summery.html', context)
 

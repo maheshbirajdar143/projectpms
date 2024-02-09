@@ -16,14 +16,22 @@
 
             <div class="p-2 mb-2 text-black" style = 'margin-top:5px;'>
                 <div style = 'display: inline-block;'>
-                    <a href="{% url 'allproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                    
+                    {% if user_department.department == 'Production' or user_department.department == 'Pipeline' or user_department.department == 'Management' %}
+                        <a href="{% url 'allproject' %}"     style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                    {%else%}
+                        <a href="#" title="Only For Production & Management"    style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Production </a>
+                    {%endif%}
+
                     <a href="{% url 'mandays' %}"        style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Mandays</a>
                     <a href="{% url 'viewissuedshot' %}" style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn">Artist</a>
                     <a href="{% url 'mang_message1' %}"  style='border-radius: 15px; text-align: center;' class="btn btn-outline-dark btn-sm fixed-width-btn"> Management</a>
                 </div>
 
                 <div style = 'display: inline-block; font-size: 18px; margin-left:400px; color:white'>
-                    <h5 style="border-radius: 35px; text-align:center; background-color: #656262; width: 200px; height:25px;">All Project Shots </h5>
+                    <h5 style="border-radius: 35px; text-align:center; background-color: #656262; display: inline-block; width: 250px; height:25px;">
+                        <small>All Shots </small>: {{request.GET.text|slice:":10"}}{% if request.GET.text|length > 10 %}...{% endif %}
+                     </h5>
                 </div>
             </div>
 
@@ -33,19 +41,22 @@
                     <table class="redTable1" style="width:100px">
                         <thead>
                             <tr>
-                                <th>Project List</th>
+                                <th>All Projects </th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for each in projects %}
                                 <tr>
                                     <td style="position: relative;">
-                                        <a href="{% url 'allshot_project' project_name=each.project_name %}" title="{{ each.project_name }}" 
-                                            style='border-radius: 25px; text-align: center; width: 100px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;'
-                                            class="btn btn-outline-primary btn-sm" 
-                                            role="button" aria-pressed="true">
-                                            {{ each.project_name }}
-                                        </a>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <a href="{% url 'allshot_project' project_name=each.project_name %}?text={{ each.project_name }}" title="{{ each.project_name }} ({{each.num_shots}})" 
+                                                style='border-radius: 25px; text-align: center; width: calc(100%); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;'
+                                                class="btn btn-outline-primary btn-sm" 
+                                                role="button" aria-pressed="true">
+                                                {{ each.project_name|slice:":10" }}{% if each.project_name|length > 10 %}...{% endif %}
+                                            </a>
+                                            <span style="text-align: right; width: 50px;">({{ each.num_shots }})</span>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -72,11 +83,11 @@
                             <th>Assign                 </th>
                         </tr>
                     </thead>
-    
+                    
                     <tbody>
                            
                         {% for shot in shots %}
-                            <tr>
+                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <!-- <td>{{ shot.project_name }}</td> -->
     
@@ -172,15 +183,15 @@
                                     </a>&nbsp;
                                 </td>
                             </tr>
+                       
                         {% endfor %}
                     </tbody>
                 </table>
-                {% endif %}</div>
+                {% endif %}
             </div>
+        </div>
   </body>
 </html>
-
-
 
 
 <!-- --------------------------------------------------------------------------------------------------------------------------------- -->
@@ -272,3 +283,135 @@
         location.reload();
     }, 300000);
 </script>
+
+
+
+     <!-- only single selected checkboc search and display  -->
+    
+
+    <!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.getElementById('table');
+        const headers = table.getElementsByTagName('th');
+        let storedFilters = JSON.parse(sessionStorage.getItem('tableFilters')) || {};
+
+        // Update filter symbols and apply stored filters
+        for (let i = 1; i < headers.length - 1; i++) {
+            const filterSymbol = document.createElement('span');
+            filterSymbol.innerHTML = '<span style="font-size: smaller;">&#9660;</span>';
+            filterSymbol.style.cursor = 'pointer';
+            filterSymbol.onclick = function () {
+                showFilterDropdown(i);
+            };
+            headers[i].innerHTML = headers[i].textContent;          // Clear existing content
+            headers[i].appendChild(filterSymbol);
+
+            // Check if a filter is applied to this header for this project
+            const projectName = "{{ project_name }}"; // Get the current project name
+            if (storedFilters[projectName] && storedFilters[projectName][i] && storedFilters[projectName][i] !== 'all') {
+                applyFilter(i, storedFilters[projectName][i]);
+                // Highlight the filter symbol for this header
+                highlightFilterSymbol(i, '#ffcc00');  // Change color to your preference
+            }
+        }
+
+        function showFilterDropdown(columnIndex) {
+            // Check if the dropdown is already open
+            const existingDropdown = document.getElementById('filterDropdown');
+            if (existingDropdown) {
+                // Dropdown is open, close it
+                document.body.removeChild(existingDropdown);
+                return; // Return to prevent creating a new dropdown
+            }
+
+            const values = Array.from(new Set(Array.from(table.rows).slice(1).map(row => row.cells[columnIndex].textContent.split(',').map(item => item.trim())).flat()));
+            const dropdown = document.createElement('div');
+            dropdown.id = 'filterDropdown'; // Set an ID to easily identify the dropdown
+            dropdown.style.position = 'absolute';
+            dropdown.style.backgroundColor = 'lightgray'; // Background color added here
+
+            const allCheckbox = document.createElement('input');
+            allCheckbox.type = 'checkbox';
+            allCheckbox.value = 'all';
+            const projectName = "{{ project_name }}"; // Get the current project name
+            allCheckbox.checked = storedFilters[projectName] && storedFilters[projectName][columnIndex] === 'all';
+
+            allCheckbox.onclick = function () {
+                if (this.checked) {
+                    applyFilter(columnIndex, 'all');
+                    const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+                    checkboxes.forEach(checkbox => checkbox.checked = false);
+                    // Close dropdown after selecting 'All'
+                    document.body.removeChild(dropdown);
+                    // Unhighlight the color of the filter symbol immediately
+                    highlightFilterSymbol(columnIndex, ''); // Change color to your preference
+                }
+            };
+
+            dropdown.appendChild(allCheckbox);
+            dropdown.appendChild(document.createTextNode('All'));
+            dropdown.appendChild(document.createElement('br'));
+
+            values.forEach(value => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = value;
+                const projectName = "{{ project_name }}"; // Get the current project name
+                checkbox.checked = storedFilters[projectName] && storedFilters[projectName][columnIndex] === value;
+                checkbox.onclick = function () {
+                    if (this.checked) {
+                        applyFilter(columnIndex, this.value);
+                        allCheckbox.checked = false;
+                        // Highlight filter symbol immediately
+                        highlightFilterSymbol(columnIndex, '#ffcc00');
+                    } else {
+                        applyFilter(columnIndex, 'all');
+                        // Clear color of filter symbol immediately
+                        highlightFilterSymbol(columnIndex, 'black');
+                    }
+                    // Close dropdown after selecting an option
+                    // document.body.removeChild(dropdown);
+                };
+                dropdown.appendChild(checkbox);
+                dropdown.appendChild(document.createTextNode(value));
+                dropdown.appendChild(document.createElement('br'));
+            });
+
+            const filterSymbol = headers[columnIndex].lastChild;
+            const rect = filterSymbol.getBoundingClientRect();
+
+            // Calculate position relative to the table cell
+            const tdRect = headers[columnIndex].getBoundingClientRect();
+            dropdown.style.top = tdRect.bottom + window.scrollY + 'px';
+            dropdown.style.left = tdRect.left + window.scrollX + 'px';
+            document.body.appendChild(dropdown);
+        }
+
+
+        function applyFilter(columnIndex, filterValue) {
+            for (let i = 1; i < table.rows.length; i++) {
+                const cellValue = table.rows[i].cells[columnIndex].textContent;
+                if (filterValue === 'all' || cellValue.includes(filterValue)) {
+                    table.rows[i].style.display = '';
+                } else {
+                    table.rows[i].style.display = 'none';
+                }
+            }
+            const projectName = "{{ project_name }}"; // Get the current project name
+            if (!storedFilters[projectName]) {
+                storedFilters[projectName] = {};
+            }
+            storedFilters[projectName][columnIndex] = filterValue;
+            sessionStorage.setItem('tableFilters', JSON.stringify(storedFilters));
+        }
+
+        function highlightFilterSymbol(columnIndex, color) {
+            // Change the color of the filter symbol for the specified header
+            const filterSymbol = headers[columnIndex].lastChild;
+            filterSymbol.style.color = color;
+        }
+    });
+</script>  -->
+
+
+
