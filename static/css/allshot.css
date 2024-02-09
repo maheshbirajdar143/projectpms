@@ -254,7 +254,6 @@ iframe {
 }
 
 
-
 .redTable1 {
   margin: left; /* Align the table in the center */
   width: 10%; /* Adjust the width as needed */
@@ -306,3 +305,11 @@ table.redTable1 td, table.redTable1 th {
   background-color: #f1f1f1;
   padding-top: 20px;
 }
+
+
+.active-filter {
+  color: yellow; 
+}
+
+
+

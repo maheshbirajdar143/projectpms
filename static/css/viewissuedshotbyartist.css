@@ -74,6 +74,11 @@ user-select: text;
 }
 
 
+.description-cell {
+  max-width: 250px; 
+  word-wrap: break-word;
+  }
+
 .modal {
     display: none;
     position: fixed;

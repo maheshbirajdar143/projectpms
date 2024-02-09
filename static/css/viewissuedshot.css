@@ -105,6 +105,12 @@ cursor: grab;
 background-color: orange;
 }
 
+.description-cell {
+  max-width: 250px; 
+  word-wrap: break-word;
+  }
+
+
 /* Modal Styles */
 .modal {
     display: none;
